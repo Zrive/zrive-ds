@@ -19,6 +19,8 @@ Finalmente, también utilizamos `mypy` para checkear tipos en nuestro código. _
 
 ## Repo structure
 Utilizaremos la estructura por defecto que genera poetry al crear un nuevo proyecto y separamos el código de cada módulo y sus tests en una subcarpeta para facilitar la revisión del mismo. Dentro del `zrive-ds` añadiremos todo el código, en forma de jupyter notebooks o scripts. En tests, añadiremos tests unitarios cuando se pidan que permitan testear el código que hemos desarrollado para "garantizar" su correcto funcionamiento.
+
+Utilizar `make lint` y `make test`, definidos en la Makefile para estandarizar el linting y asegurar que todos los tests corren. Esto facilitará también la revisión del código.
 ```
 zrive-ds
 ├── pyproject.toml
