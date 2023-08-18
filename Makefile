@@ -1,5 +1,5 @@
 lint:
-	poetry run black zrive-ds tests
+	poetry run black src tests
 
 test:
 	poetry run flake8 src tests

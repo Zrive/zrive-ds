@@ -23,7 +23,7 @@ Utilizaremos la estructura por defecto que genera poetry al crear un nuevo proye
 zrive-ds
 ├── pyproject.toml
 ├── README.md
-├── zrive-ds
+├── src
 │   ├── __init__.py
 │   ├── module 1
 │   ├── module 2
