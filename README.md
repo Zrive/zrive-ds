@@ -15,7 +15,7 @@ Además, para garantizar la estandarización del código utilizamos:
 1. `Black`: formatter no configurable que fuerza que el código tome el mismo formato en todos los proyectos.
 2. `Flake8`: is a code linter. It warns you of syntax errors, possible bugs, stylistic errors, etc.
 
-Finalmente, también utilizamos `mypy` para checkear tipos en nuestro código. _Mypy is a static type checker for Python). Python is a dynamic language, so usually you'll only see errors in your code when you attempt to run it. Mypy is a static checker, so it finds bugs in your programs without even running them!_
+Finalmente, también tenemos instalado `mypy` para checkear tipos en nuestro código, sin embargo no lo tenemos en uso activo en `make test` ya que requiere cierta configuración. _Mypy is a static type checker for Python). Python is a dynamic language, so usually you'll only see errors in your code when you attempt to run it. Mypy is a static checker, so it finds bugs in your programs without even running them!_
 
 ## Repo structure
 Utilizaremos la estructura por defecto que genera poetry al crear un nuevo proyecto y separamos el código de cada módulo y sus tests en una subcarpeta para facilitar la revisión del mismo. Dentro del `zrive-ds` añadiremos todo el código, en forma de jupyter notebooks o scripts. En tests, añadiremos tests unitarios cuando se pidan que permitan testear el código que hemos desarrollado para "garantizar" su correcto funcionamiento.
