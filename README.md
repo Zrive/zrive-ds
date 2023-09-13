@@ -43,3 +43,32 @@ zrive-ds
     └── module 6
 ```
 
+
+## Data
+Todos los datos estarán disponibles en s3, accesible mediante el uso de access keys que os facilitaré yo para que guardéis en vuestro `.env` para evitar subirlo al repositario en plain text (compartiré el enlace a 1password para obtener los access keys).
+
+Una vez tengais las access keys podeis conectaros utilizando AWS CLI con las siguientes instrucciones:
+1. `aws configure` -> tras la cual, solo tenéis que añadir las access keys, lo demas lo podéis dejar por defecto.
+2. `aws s3 ls s3://zrive-ds-data/ --recursive` -> Para mostrar los datos en s3
+
+Los datos encontraréis disponibles en s3 son:
+1. `groceries/sampled-datasets/`:
+    - orders.parquet: An order history of customers. Each row is an order and the item_ids for the order are stored as a list in the item_ids column
+    - regulars.parquet: We allow users to specify items that they wish to buy regularly. This data gives the items each user has asked to get regularly, along with when they input that information.
+    - abandoned_cart.parquet: If a user has added items to their basket but not bought them, we capture that information. Items that were abandoned are stored as a list in item_ids.
+    - inventory.parquet: Some information about each item_id that may prove useful for your model
+    - users.parquer: Information about users that may be useful for the model.
+
+2. `groceries/box_builder_dataset/` -> full-size dataset donde cada "instance" corresponde al triplet (order, user, product):
+    - El dataset solo incluye una selección de productos que excluye el long tail de productos. 
+    - Este dataset solo incluye "repeating orders" (excluye las primeras ordenes). 
+    - La etiqueta "outcome" binaria es si el producto fue comprado o no en esa orden.
+    - Este dataset está pensado para entrenar un modelo que permita predecir que productos poner en la siguiente cesta antes de que llegue el usuario.
+    - Se puede utilizar también para simular otros problemas:
+        - Serie temporal de ventas de productos.
+        - Probabilidad de que un usuario compre X dias tras la compra previa.
+        - Predecir el valor (GBP) de la siguiente compra.
+
+
+La primera vez que vayais a trabajar con los datos, debeis descargarlos utilizando python `boto3` o `AWS CLI` y a partir de ahí guardarlos en local para evitar tener que descargarlos cada vez (IMPORTANTE: Se considera una buena práctica no añadir datos a vuestros repositorios de código ya que eso haría el repositorio muy pesado y todas las operaciones de version control muy lentas.)
+
