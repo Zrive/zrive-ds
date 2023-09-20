@@ -13,14 +13,18 @@ VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
 
 class APIConnector:
 
-    API_URL = "https://climate-api.open-meteo.com/v1/climate?"
+    lat, long = 0, 0
 
-    def __init__(self, url: str):
-        self.API_URL = url 
-    
-    
-
-        
+    def __init__(self, city: str):
+        self.lat = COORDINATES[city]["latitude"]
+        self.long = COORDINATES[city]["longitude"]
+        self.base = "https://climate-api.open-meteo.com/v1/climate?"
+        coords = f"latitude{self.lat}&longitude{self.long}"
+        date_span = "&start_date=1950-01-01&end_date=2050-12-31"
+        # models = ¿? Dudoso
+        mode = f"&daily={VARIABLES}"
+        self.url = self.base + coords + date_span + mode
+       
 
 
 def main():
