@@ -3,23 +3,21 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
+COORDINATES = {
+    "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
+    "London": {"latitude": 51.507351, "longitude": -0.127758},
+    "Rio": {"latitude": -22.906847, "longitude": -43.172896},
+}
+
+VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
+
 class APIConnector:
 
-    url = "https://open-meteo.com/en/docs/climate-api"
+    API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 
     def __init__(self, url: str):
-        self._url = url
+        self.API_URL = url 
     
-    def get_city(city: str):
-        match city:
-            case "Madrid":
-                return (40.4165, -3.7026)
-            case "Londres":
-                return (51.507351, -0.127758)
-            case "Rio de Janeiro":
-                return (-22.906847, -43.172896)
-            case _:
-                raise Exception("Invalid city")
     
 
         
