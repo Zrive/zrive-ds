@@ -1,3 +1,7 @@
+import requests
+import numpy as np
+
+
 API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 
 COORDINATES = {
@@ -24,10 +28,17 @@ def get_data_meteo_api(city, start_year, end_year):
     else:
         print("Failed to obtain the data for {city}: {response_status_code}")
         
-     
+def calculo_estadistico(data):
+    data_array = np.array(data)
+    mean = np.mean(data_array, axis=0)
+    std_dev = np.std(data_array, axis=0)
+    return mean, std_dev
+
+
 
 def main():
     raise NotImplementedError
 
 if __name__ == "__main__":
-    main()
+    start_year = 1950
+    end_year = 2050
