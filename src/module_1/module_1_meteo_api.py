@@ -1,5 +1,7 @@
 import requests
 import json
+import matplotlib.pyplot as plt
+import numpy as np
 
 API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 COORDINATES = {
@@ -13,16 +15,16 @@ END_DATE = "2050-12-31"
 
 
 def main():
-    a = get_data_meteo_api("Madrid")
-    # b = a["daily"]["time"]
-    # print(b[:300])
-    # print(a["daily"].keys())
+    api_data = get_data_meteo_api("Madrid")
+    daily_data = api_data["daily"]
+    yearly_data = daily_to_yearly(daily_data)
     # a = [1, 3, 5, 7, 8]
     # b = get_data_meteo_api("Madrid")
     # c = b["daily"]["soil_moisture_0_to_10cm_mean"]
     # print(mean_calculation(c))
     # print(variance_calculation(c, mean_calculation(c)))
-    print(daily_to_yearly(a["daily"]))
+    plotting(yearly_data)
+    # print(yearly_data)
 
 
 def get_data_meteo_api(city):
@@ -100,7 +102,14 @@ def daily_to_yearly(daily):
 
 
 def plotting(list):
-    a
+    x = range(len(list["time"]))
+    y = list["temperature_2m_mean"]
+    plt.plot(x, y)
+    plt.xticks(x, list["time"])
+    plt.xlim(-10, 110)
+    plt.locator_params(axis="x", nbins=10)
+    plt.show()
+    plt.savefig("mygraph.png")
 
 
 if __name__ == "__main__":
