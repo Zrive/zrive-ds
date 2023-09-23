@@ -61,7 +61,7 @@ def api_request(api_url):
             print("Error. Trying again")
 
 
-def plot_mean_and_std(mean_data, anual_mean_values, time, city, variable, model, plot_folder):
+def plot_mean_and_dev(mean_data, anual_mean_values, time, city, variable, model, plot_folder):
     y_values = anual_mean_values.values()
     x_values = anual_mean_values.keys()
 
@@ -76,11 +76,11 @@ def plot_mean_and_std(mean_data, anual_mean_values, time, city, variable, model,
     plt.scatter(x_values, y_values, label="Dispersion", color="r")
     plt.axhline(y=mean_data, color="b", linestyle="--", label="Mean value")
     plt.xlabel("Time")
-    plt.ylabel("Data")
+    plt.ylabel(variable)
     plt.xticks(fontsize=10)
     plt.xticks(rotation=45)
     plt.xticks(custom_x_labels, custom_x_labels)
-    plt.title(f"Yearly mean deviation. City: {city}. Variable measured: {variable}. Model: {model}")
+    plt.title(f"Yearly mean deviation. City: {city}. Model: {model}")
     pic_filename = f"{plot_folder}/{city}_{variable}_{model}.png"
     plt.legend()
     plt.savefig(pic_filename)
@@ -146,7 +146,7 @@ def main():
                         )
                     }  # Gets the anual dispersion from the mean
 
-                    plot_mean_and_std(
+                    plot_mean_and_dev(
                         mean_data, anual_mean_values, time, city, variable, model, plot_folder
                     )
 
