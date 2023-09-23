@@ -14,16 +14,11 @@ END_DATE = "2050-12-31"
 
 
 def main():
-    api_data = get_data_meteo_api("Madrid")
-    daily_data = api_data["daily"]
-    # a = [1, 3, 5, 7, 8]
-    b = get_data_meteo_api("Madrid")
-    c = b["daily"]["temperature_2m_mean"]
-    # print(c[:300])
-    print(mean_calculation(c))
-    print(variance_calculation(c, mean_calculation(c)))
-    plotting(daily_data)
-    # print(yearly_data)
+    for city in COORDINATES:
+        print(city)
+        api_data = get_data_meteo_api(city)
+        daily_data = api_data["daily"]
+        plotting(daily_data, city)
 
 
 def get_data_meteo_api(city):
@@ -100,7 +95,7 @@ def daily_to_yearly(daily):
     return yearly
 
 
-def plotting(list):
+def plotting(list, city):
     list1 = daily_to_yearly(list)
     x = range(len(list1["time"]))
     y1 = list1["temperature_2m_mean"]
@@ -137,7 +132,7 @@ def plotting(list):
     fig.tight_layout()
     # plt.show()
     ax1.legend(handles=[p1, p2, p3])
-    plt.savefig("mygraph.png")
+    plt.savefig(city + ".png")
 
 
 def create_labels(text, list):
