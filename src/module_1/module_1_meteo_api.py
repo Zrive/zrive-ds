@@ -41,17 +41,16 @@ def get_data_meteo_api(city, start_date, end_date):
 
 
 def api_request(api_url):
-
     n_tries = 100
 
-    for _ in range(n_tries)
+    for _ in range(n_tries):
         response = requests.get(api_url)
         time.sleep(SLEEP_REQUEST)
 
         if response.status_code == 200:
             data = response.json()
             return data
-        
+
         elif response.status_code == 404:
             print("The data you requested does not exist. Tryng again")
 
@@ -60,7 +59,6 @@ def api_request(api_url):
 
         else:
             print("Error. Trying again")
-
 
 
 def plot_mean_and_std(mean_data, anual_mean_values, time, city, variable, model, plot_folder):
@@ -115,9 +113,8 @@ def main():
                 api_url = get_data_meteo_api(city, start_date, end_date)
 
                 data_dict = api_request(api_url)
-                
-                if data:
 
+                if data_dict:  # If code != 200, data_dict = None
                     data = data_dict["daily"][data_key]
                     time = data_dict["daily"]["time"]
                     try:
@@ -130,7 +127,7 @@ def main():
                     count_year_values = {}
 
                     for value, date in zip(data, time):
-                        year = date.split("-")[0]  # Output: [2020, 01, 01]
+                        year = date.split("-")[0]
 
                         if year in sum_year_values.keys():
                             sum_year_values[year] += value
