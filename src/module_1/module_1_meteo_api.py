@@ -28,6 +28,9 @@ class APIConnector:
 
 
 def main():
+    madrid = APIConnector("Madrid")
+    londres = APIConnector("London")
+    rio = APIConnector("Rio")
     raise NotImplementedError
 
 if __name__ == "__main__":
