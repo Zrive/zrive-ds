@@ -108,7 +108,7 @@ def main():
                 # model = "CMCC_CM2_VHR4"
                 # variable = "soil_moisture_0_to_10cm_mean"
 
-                print(model, variable)
+                print(city, model, variable)
 
                 data_key = f"{variable}_{model}"
 
