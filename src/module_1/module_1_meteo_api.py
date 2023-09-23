@@ -1,7 +1,6 @@
 import requests
 import json
 import matplotlib.pyplot as plt
-import numpy as np
 
 API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 COORDINATES = {
