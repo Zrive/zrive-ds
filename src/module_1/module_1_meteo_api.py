@@ -62,11 +62,11 @@ def api_request(api_url):
 
 
 def plot_mean_and_dev(mean_data, anual_mean_values, time, city, variable, model, plot_folder):
-    y_values = anual_mean_values.values()
-    x_values = anual_mean_values.keys()
+    y_values = anual_mean_values.values()  # Yearly mean data
+    x_values = anual_mean_values.keys()  # Years
 
-    init_year = int(list(x_values)[0].split("-")[0])  # Gets the first year of dataset
-    end_year = int(list(x_values)[-1].split("-")[0])  # Gets the last year of dataset
+    init_year = int(list(x_values)[0])  # Gets the first year of dataset
+    end_year = int(list(x_values)[-1])  # Gets the last year of dataset
 
     custom_x_labels = [
         str(year) for year in range(init_year, end_year, 2)
