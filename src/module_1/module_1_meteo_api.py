@@ -33,7 +33,6 @@ class APIConnector:
         # Final URL
         url = self.base + coords + date_span + mode
         
-
         # Response
         response = requests.get(url)
         if response.status_code == 409:
@@ -111,20 +110,41 @@ class APIConnector:
         return grouped_df
 
 
-    def paint_plots(df: pd.DataFrame):
+    def paint_plots(df: pd.DataFrame, freq="monthly"):
+        if freq == "monthly":
+            x = df['month']
+        else:
+            x = df['year']
         
-        pass
+        y1 = df[df.columns[0]] 
+        y2 = df[df.columns[1]]
+        y3 = df[df.columns[2]]
+        
+        fig, ax = plt.subplots(figsize=(9, 6))
+        ax.plot(x, y1)
+        ax.plot(x, y2)
+        ax.plot(x, y3)
+
+        return fig
+
+
 
 
 
 def main():
     connector = APIConnector()
+
     df_madrid = connector.get_data_meteo_api("Madrid")
     df_londres = connector.get_data_meteo_api("London")
     df_rio = connector.get_data_meteo_api("Rio")
 
     madrid = APIConnector.calc_stats(df_madrid)
-    
+    londres = APIConnector.calc_stats(df_londres)
+    rio = APIConnector.calc_stats(df_rio)
+
+    madrid_fig = APIConnector.paint_plots(madrid)
+    londres_fig = APIConnector.paint_plots(londres)
+    rio_fig = APIConnector.paint_plots(rio)
 
     
 
