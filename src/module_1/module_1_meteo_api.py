@@ -92,6 +92,8 @@ class APIConnector:
         if freq == "monthly":
             # Maybe parse the string using .split('-') could be another option, not sure what's best
             working_df['date'] = pd.to_datetime(working_df['date'])
+            working_df['year'] = working_df['date'].dt.year
+            working_df['date'] = pd.to_datetime(working_df['date'])
             working_df['month'] = working_df['date'].dt.month
             working_df = working_df.drop(columns='date')
 
@@ -99,7 +101,7 @@ class APIConnector:
             grouped_df = working_df.groupby('month').agg([np.mean, np.var, np.std]).reset_index()
 
         # elif freq == "yearly":
-        # In case there's a chance to introduce more cases (semesters, trimesters, etc)
+            # In case there's a chance to introduce more cases (semesters, trimesters, etc)
         else:
             working_df['date'] = pd.to_datetime(working_df['date'])
             working_df['year'] = working_df['date'].dt.year
@@ -111,7 +113,7 @@ class APIConnector:
         return grouped_df
 
 
-    def paint_plots(dfs: list, freq="monthly"):
+    def paint_plots(dfs: list, plot: str, freq="monthly"):
         
         # It's all the same to use any to get the dates
         if freq == "monthly":
@@ -119,15 +121,38 @@ class APIConnector:
         else:
             x = dfs[0]['year']
         
-        
-        y1 = df.loc[:, df.columns[1]] 
-        y2 = df[df.columns[2]]
-        y3 = df[df.columns[3]]
-        
-        fig1, ax1 = plt.subplots(figsize=(9, 6))
-        ax.plot(x, y1)
-        ax.plot(x, y2)
-        ax.plot(x, y3)
+        # Since the grouped df is multi indexed and we want to compare
+        # every metric on their own (mean against mean, etc):
+        if plot == "mean":
+            for df in dfs:
+                y1 = df.loc[:, df.columns[1]] 
+                y2 = df[:, df.columns[4]]
+                y3 = df[: , df.columns[7]]
+            
+                fig, ax = plt.subplots(figsize=(9, 6))
+                ax.plot(x, y1)
+                ax.plot(x, y2)
+                ax.plot(x, y3)
+        elif plot == "var":
+            for df in dfs:
+                y1 = df.loc[:, df.columns[2]] 
+                y2 = df[:, df.columns[5]]
+                y3 = df[: , df.columns[8]]
+            
+                fig, ax = plt.subplots(figsize=(9, 6))
+                ax.plot(x, y1)
+                ax.plot(x, y2)
+                ax.plot(x, y3)
+        else:
+            for df in dfs:
+                y1 = df.loc[:, df.columns[3]] 
+                y2 = df[:, df.columns[6]]
+                y3 = df[: , df.columns[9]]
+            
+                fig, ax = plt.subplots(figsize=(9, 6))
+                ax.plot(x, y1)
+                ax.plot(x, y2)
+                ax.plot(x, y3)
 
         return fig
 
@@ -142,11 +167,9 @@ def main():
     londres = APIConnector.calc_stats(df_londres)
     rio = APIConnector.calc_stats(df_rio)
     
-    display(madrid.columns)
-
-#     madrid_fig = APIConnector.paint_plots(madrid)
-#     londres_fig = APIConnector.paint_plots(londres)
-#     rio_fig = APIConnector.paint_plots(rio)
+    mean = APIConnector.paint_plots([madrid, londres, rio], "mean")
+    var = APIConnector.paint_plots([madrid, londres, rio], "var")
+    std = APIConnector.paint_plots([madrid, londres, rio], "std")
     
 
 
