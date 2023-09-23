@@ -126,6 +126,10 @@ class APIConnector:
         fig1, ax1 = plt.subplots(figsize=(9, 6))
         fig2, ax2 = plt.subplots(figsize=(9, 6))
         fig3, ax3 = plt.subplots(figsize=(9, 6))
+
+        ax1.set_title(f"Temperature: {plot}")
+        ax2.set_title(f"Rain: {plot}")
+        ax3.set_title(f"Moisture: {plot}")
         
         if plot == "mean":
             for df in dfs:
@@ -136,7 +140,7 @@ class APIConnector:
                 ax1.plot(x, y1)
                 ax2.plot(x, y2)
                 ax3.plot(x, y3)
-                
+
         elif plot == "var":
             for df in dfs:
                 y1 = df.loc[:, df.columns[2]] 
@@ -155,6 +159,10 @@ class APIConnector:
                 ax1.plot(x, y1)
                 ax2.plot(x, y2)
                 ax3.plot(x, y3)
+
+        ax1.legend(["Madrid", "London", "Rio"])
+        ax2.legend(["Madrid", "London", "Rio"])
+        ax3.legend(["Madrid", "London", "Rio"])
 
 def main():
     connector = APIConnector()
