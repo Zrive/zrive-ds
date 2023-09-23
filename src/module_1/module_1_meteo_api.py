@@ -2,6 +2,7 @@
 import pandas as pd
 import requests
 import matplotlib.pyplot as plt
+import time
 
 COORDINATES = {
     "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
@@ -13,17 +14,40 @@ VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
 
 class APIConnector:
 
-    lat, long = 0, 0
+    url = ""
 
-    def __init__(self, city: str):
-        self.lat = COORDINATES[city]["latitude"]
-        self.long = COORDINATES[city]["longitude"]
-        self.base = "https://climate-api.open-meteo.com/v1/climate?"
-        coords = f"latitude{self.lat}&longitude{self.long}"
+    # Silly constructor
+    def __init__(self):
+        self.url = "https://climate-api.open-meteo.com/v1/climate?"
+
+    # Call api method, we'll see how to manage status_code
+    def call_api(self, city: str):
+        # URL inputs
+        lat = COORDINATES[city]["latitude"]
+        long = COORDINATES[city]["longitude"]
+        coords = f"latitude{lat}&longitude{long}"
         date_span = "&start_date=1950-01-01&end_date=2050-12-31"
-        # models = ¿? Dudoso
         mode = f"&daily={VARIABLES}"
-        self.url = self.base + coords + date_span + mode
+
+        # Final URL
+        self.url = self.url + coords + date_span + mode
+
+        # Response
+        response = requests.get(self.url)
+        if response.status_code == 409:
+            sleepy_cooloff = 0
+            time.sleep(sleepy_cooloff)
+            response = requests.get(self.url)
+        return response.json()
+    
+    # get_data_meteo_api, should return treated response
+    def get_data_meteo_api(self, city: str):
+        # Response JSON
+        response = self.call_api(city)
+        # Treat response
+        df_response = pd.DataFrame(response)
+
+        return df_response
        
 
 
