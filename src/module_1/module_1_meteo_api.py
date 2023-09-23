@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 import time
+import numpy as np
 
 COORDINATES = {
     "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
@@ -43,6 +44,7 @@ class APIConnector:
     
     # Schema validation
     def validate_schema(json: dict) -> bool:
+        # Base schema
         schema = {
             'latitude':float,
             'longitude':float,
@@ -54,6 +56,7 @@ class APIConnector:
             'daily_units':str,
             'daily': list
         }
+        # Checks on keys and dtypes
         for key, d_type in schema.items():
             if key not in json:
                 return False
@@ -72,6 +75,47 @@ class APIConnector:
         # print(df_response.head())
 
         return df_response
+    
+    # Calculate mean and dispersion (std & variance)
+    def calc_stats(df: pd.DataFrame, freq:str ="monthly") -> pd.DataFrame:
+        # Get data from df
+        time = df['daily'][0]
+        temp = df['daily'][1]
+        prec = df['daily'][2]
+        moist = df['daily'][3]
+        
+        # New df with data in cols
+        working_df = pd.DataFrame([time,temp,prec,moist],
+                                columns=["date","temperature_2m_mean", "precipitation_sum", "soil_moisture_0_to_10cm_mean"])
+        
+        # Check frequency of data
+        if freq == "monthly":
+            # Maybe parse the string using .split('-') could be another option, not sure what's best
+            working_df['date'] = pd.to_datetime(working_df['date'])
+            working_df['month'] = working_df['date'].dt.month
+            working_df = working_df.drop(columns='date')
+
+            # Group by month and get stats
+            grouped_df = working_df.groupby('month').agg([np.mean, np.var, np.std]).reset_index()
+
+        # elif freq == "yearly":
+        # In case there's a chance to introduce more cases (semesters, trimesters, etc)
+        else:
+            working_df['date'] = pd.to_datetime(working_df['date'])
+            working_df['year'] = working_df['date'].dt.year
+            working_df = working_df.drop(columns='date')
+
+            # Group by year and get stats
+            grouped_df = working_df.groupby('year').agg([np.mean, np.var, np.std]).reset_index()
+
+        print(grouped_df)
+        return grouped_df
+
+
+    def paint_plots(df: pd.DataFrame):
+
+        pass
+
 
 
 def main():
@@ -79,7 +123,10 @@ def main():
     df_madrid = connector.get_data_meteo_api("Madrid")
     df_londres = connector.get_data_meteo_api("London")
     df_rio = connector.get_data_meteo_api("Rio")
-    # raise NotImplementedError
+
+
+    
+
 
 if __name__ == "__main__":
     main()
