@@ -17,13 +17,13 @@ END_DATE = "2050-12-31"
 def main():
     api_data = get_data_meteo_api("Madrid")
     daily_data = api_data["daily"]
-    yearly_data = daily_to_yearly(daily_data)
     # a = [1, 3, 5, 7, 8]
-    # b = get_data_meteo_api("Madrid")
-    # c = b["daily"]["soil_moisture_0_to_10cm_mean"]
-    # print(mean_calculation(c))
-    # print(variance_calculation(c, mean_calculation(c)))
-    plotting(yearly_data)
+    b = get_data_meteo_api("Madrid")
+    c = b["daily"]["temperature_2m_mean"]
+    # print(c[:300])
+    print(mean_calculation(c))
+    print(variance_calculation(c, mean_calculation(c)))
+    plotting(daily_data)
     # print(yearly_data)
 
 
@@ -88,7 +88,7 @@ def daily_to_yearly(daily):
         if actual_year != int(year[0]):
             yearly["time"].append(actual_year)
             yearly["temperature_2m_mean"].append(mean_calculation(temp))
-            yearly["precipitation_sum"].append(mean_calculation(prec))
+            yearly["precipitation_sum"].append(round(sum(prec), 3))
             yearly["soil_moisture_0_to_10cm_mean"].append(mean_calculation(soil))
             actual_year = int(year[0])
             temp.clear()
@@ -102,14 +102,61 @@ def daily_to_yearly(daily):
 
 
 def plotting(list):
-    x = range(len(list["time"]))
-    y = list["temperature_2m_mean"]
-    plt.plot(x, y)
-    plt.xticks(x, list["time"])
-    plt.xlim(-10, 110)
+    list1 = daily_to_yearly(list)
+    x = range(len(list1["time"]))
+    y1 = list1["temperature_2m_mean"]
+    y2 = list1["precipitation_sum"]
+    y3 = list1["soil_moisture_0_to_10cm_mean"]
+    fig, ax1 = plt.subplots(figsize=(20, 6))
+    ax2 = ax1.twinx()
+    ax3 = ax1.twinx()
+    ax3.spines.right.set_position(("axes", 1.05))
+
+    l1 = create_labels("temperature_2m_mean", list)
+    l2 = create_labels("precipitation_sum", list)
+    l3 = create_labels("soil_moisture_0_to_10cm_mean", list)
+    (p1,) = ax1.plot(x, y1, "r-", label=l1)
+    p2 = ax2.bar(x, y2, color="blue", label=l2)
+    (p3,) = ax3.plot(x, y3, "g-", label=l3)
+    ax1.yaxis.label.set_color(p1.get_color())
+    ax2.yaxis.label.set_color("blue")
+    ax3.yaxis.label.set_color(p3.get_color())
+
+    ax1.set_xlabel("Year")
+    ax1.set_ylabel("°C")
+    ax2.set_ylabel("mm")
+    ax3.set_ylabel("m3/m3")
+    plt.xticks(x, list1["time"])
+    plt.xlim(-1, 101)
     plt.locator_params(axis="x", nbins=10)
-    plt.show()
+    tkw = dict(size=4, width=1.5)
+    ax1.tick_params(axis="y", colors=p1.get_color(), **tkw)
+    ax2.tick_params(axis="y", colors="blue", **tkw)
+    ax3.tick_params(axis="y", colors=p3.get_color(), **tkw)
+    ax1.tick_params(axis="x", **tkw)
+
+    fig.tight_layout()
+    # plt.show()
+    ax1.legend(handles=[p1, p2, p3])
     plt.savefig("mygraph.png")
+
+
+def create_labels(text, list):
+    label = (
+        text[:4]
+        + "_mean="
+        + str(mean_calculation(list[text]))
+        + " "
+        + text[:4]
+        + "_disp="
+        + str(
+            variance_calculation(
+                list[text],
+                mean_calculation(list[text]),
+            )
+        )
+    )
+    return label
 
 
 if __name__ == "__main__":
