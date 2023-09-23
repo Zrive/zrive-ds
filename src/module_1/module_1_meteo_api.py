@@ -39,21 +39,23 @@ def get_data_meteo_api(city, coordinates, start_date, end_date, vars):
         time.sleep(10)
     return df
 
-def data_colapse(df, i):
-    df['time'] = pd.to_datetime(df['time'])
-    df = df.groupby(df['time'].dt.year).mean()
-    df['city'] = i
-    return df
-
 def data_parse(df, variables):
     vars = [x.strip() for x in variables.split(',')]
-    resumen_df = df[['time', 'city']].copy()
+    resumen_df = df[['time']].copy()
     for variable in vars:
         modelos = [col for col in df.columns if variable in col]
         promedio_por_dia = df[modelos].mean(axis=1)
         resumen_df[variable] = promedio_por_dia
     return resumen_df
 
+def conf_interval(df):
+    df['time'] = pd.to_datetime(df['time'])
+    df = df.melt(id_vars = ['time'], var_name = 'Indicadores', value_name = 'Value')
+    df['Year'] = df['time'].dt.year
+    result = df.groupby(['Year', 'Indicadores'])['Value'].agg(['mean', 'std']).reset_index()
+    result['Lower_CI'] = result.apply(lambda row: row['mean'] - stats.t.ppf(1 - 0.05/ 2, df=len(df) - 1) * row['std'] / (len(df) ** 0.5), axis=1)
+    result['Upper_CI'] = result.apply(lambda row: row['mean'] + stats.t.ppf(1 - 0.05/ 2, df=len(df) - 1) * row['std'] / (len(df) ** 0.5), axis=1) 
+    return result
 
 def graficar_bueno(df, variables):
     vars = [x.strip() for x in variables.split(',')]
@@ -61,31 +63,54 @@ def graficar_bueno(df, variables):
         df_filtered = df[df["Indicadores"] == variable]
         # Filtrar el DataFrame para incluir solo datos del primer día de cada mes
         line = alt.Chart(df_filtered).mark_line().encode(x='time:T',y='Value', color = 'city:N')
-        interval = alt.Chart(df_filtered).mark_area(opacity=0.3).encode(x='time:T',y=alt.Y('Value:Q'),color='city:N')
+        interval = alt.Chart(df_filtered).mark_errorband(extent='ci').encode(x='time:T',y=alt.Y('Value:Q'),color='city:N')
         title = alt.TitleParams(text=variable, align='center', fontSize=20)
         final_chart = (line + interval).properties(title=title,width=600,height=400)
         final_chart.save(f'{variable}_meteo.html')
         # Mostrar el gráfico en pantalla (opcional)
         #plt.show()
 
+def graficar_malo(df, variables):
+    vars = [x.strip() for x in variables.split(',')]
+    for variable in vars:
+        df_filtered = df[df["Indicadores"] == variable]
+        cities = df_filtered['city'].unique()
+        fig, ax = plt.subplots(figsize=(10, 6))
+        for city in cities:
+            city_data = df_filtered[df_filtered['city'] == city]
+            ax.plot(city_data['Year'], city_data['mean'], label=city)
+            ax.fill_between(city_data['Year'], city_data['Lower_CI'], city_data['Upper_CI'], alpha=0.3)
+        
+        ax.set_xlabel('Year')
+        ax.set_ylabel('Value')
+        ax.set_title('Value with Confidence Intervals by City')
+        ax.legend(loc='upper left')
+
+        fig.savefig(f'{variable}_meteo.jpg', format='jpg')
+
 def main():
         # Variables iniciales
     COORDINATES = {
-    "Madrid": {"latitude": 40.416775, "longitude": -3.703790}
+    "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
+    "London": {"latitude": 51.507351, "longitude": -0.127758},
+    "Rio": {"latitude": -22.906847, "longitude": -43.172896},
     }
     start_date='1950-01-01'
     end_date='2023-08-30'
     VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
-        #####
+        ###########################
+            ##################
+        ###########################
     data_cities = []
     for i in COORDINATES.keys():
         city_data = get_data_meteo_api(city = i, coordinates = COORDINATES[i], start_date = start_date,
                                               end_date = end_date, vars = VARIABLES)
-        data_cities.append(data_colapse(city_data, i))
+        viariable_data = data_parse(df = city_data, variables = VARIABLES)
+        variable_intervals = conf_interval(df = viariable_data)
+        variable_intervals['city'] = i
+        data_cities.append(variable_intervals)
     meteo_data = pd.concat(data_cities, axis = 0)
-    meteo_data = data_parse(meteo_data, variables = VARIABLES)
-    meteo_data_final = meteo_data.melt(id_vars = ['time', 'city'], var_name = 'Indicadores', value_name = 'Value')
-    graficar_bueno(df = meteo_data_final, variables = VARIABLES)
+    graficar_malo(df = meteo_data, variables = VARIABLES)
 
 if __name__ == "__main__":
     start_time = time.time()
