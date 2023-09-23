@@ -98,7 +98,7 @@ class APIConnector:
             working_df = working_df.drop(columns='date')
 
             # Group by month and get stats
-            grouped_df = working_df.groupby('month').agg([np.mean, np.var, np.std]).reset_index()
+            grouped_df = working_df.groupby(['year', 'month']).agg([np.mean, np.var, np.std]).reset_index()
 
         # elif freq == "yearly":
             # In case there's a chance to introduce more cases (semesters, trimesters, etc)
