@@ -127,10 +127,6 @@ class APIConnector:
 
         return fig
 
-
-
-
-
 def main():
     connector = APIConnector()
 
