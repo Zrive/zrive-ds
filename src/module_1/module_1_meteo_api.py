@@ -41,18 +41,8 @@ class APIConnector:
             response = requests.get(url)
         return response.json()
     
-    # get_data_meteo_api, should return treated response
-    def get_data_meteo_api(self, city: str):
-        # Response JSON
-        response = self.call_api(city)
-        
-        # Treat response
-        df_response = pd.DataFrame(response)
-        # print(df_response.head())
-
-        return df_response
-       
-    def validate_schema(json: dict):
+    # Schema validation
+    def validate_schema(json: dict) -> bool:
         schema = {
             'latitude':float,
             'longitude':float,
@@ -70,12 +60,23 @@ class APIConnector:
             if not isinstance(json[key], d_type):
                 return False
         return True
+    
+    # get_data_meteo_api, should return treated response
+    def get_data_meteo_api(self, city: str) -> pd.DataFrame:
+        # Response JSON
+        response = self.call_api(city)
+        if not APIConnector.validate_schema(response):
+            raise Exception(f"Invalid schema for response {response}")
+        # Treat response
+        df_response = pd.DataFrame(response)
+        # print(df_response.head())
+
+        return df_response
 
 
 def main():
     connector = APIConnector()
     df_madrid = connector.get_data_meteo_api("Madrid")
-    print(df_madrid.head().dtypes)
     df_londres = connector.get_data_meteo_api("London")
     df_rio = connector.get_data_meteo_api("Rio")
     # raise NotImplementedError
