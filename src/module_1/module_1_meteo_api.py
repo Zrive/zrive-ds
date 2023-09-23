@@ -1,4 +1,3 @@
-""" This is a dummy example """
 import pandas as pd
 import requests
 import matplotlib.pyplot as plt
@@ -52,8 +51,8 @@ class APIConnector:
             'timezone': object,
             'timezone_abbreviation': object,
             'elevation':float,
-            'daily_units':str,
-            'daily': list
+            'daily_units':object,
+            'daily': object
         }
         # Checks on keys and dtypes
         for key, d_type in schema.items():
@@ -71,7 +70,6 @@ class APIConnector:
             raise Exception(f"Invalid schema for response {response}")
         # Treat response
         df_response = pd.DataFrame(response)
-        # print(df_response.head())
 
         return df_response
     
@@ -84,8 +82,11 @@ class APIConnector:
         moist = df['daily'][3]
         
         # New df with data in cols
-        working_df = pd.DataFrame([time,temp,prec,moist],
-                                columns=["date","temperature_2m_mean", "precipitation_sum", "soil_moisture_0_to_10cm_mean"])
+        working_df = pd.DataFrame()
+        working_df['date'] = time
+        working_df['temperature_2m_mean'] = temp
+        working_df['precipitation_sum'] = prec
+        working_df['soil_moisture_0_to_10cm_mean'] = moist
         
         # Check frequency of data
         if freq == "monthly":
@@ -110,17 +111,20 @@ class APIConnector:
         return grouped_df
 
 
-    def paint_plots(df: pd.DataFrame, freq="monthly"):
+    def paint_plots(dfs: list, freq="monthly"):
+        
+        # It's all the same to use any to get the dates
         if freq == "monthly":
-            x = df['month']
+            x = dfs[0]['month']
         else:
-            x = df['year']
+            x = dfs[0]['year']
         
-        y1 = df[df.columns[0]] 
-        y2 = df[df.columns[1]]
-        y3 = df[df.columns[2]]
         
-        fig, ax = plt.subplots(figsize=(9, 6))
+        y1 = df.loc[:, df.columns[1]] 
+        y2 = df[df.columns[2]]
+        y3 = df[df.columns[3]]
+        
+        fig1, ax1 = plt.subplots(figsize=(9, 6))
         ax.plot(x, y1)
         ax.plot(x, y2)
         ax.plot(x, y3)
@@ -133,15 +137,16 @@ def main():
     df_madrid = connector.get_data_meteo_api("Madrid")
     df_londres = connector.get_data_meteo_api("London")
     df_rio = connector.get_data_meteo_api("Rio")
-
+        
     madrid = APIConnector.calc_stats(df_madrid)
     londres = APIConnector.calc_stats(df_londres)
     rio = APIConnector.calc_stats(df_rio)
+    
+    display(madrid.columns)
 
-    madrid_fig = APIConnector.paint_plots(madrid)
-    londres_fig = APIConnector.paint_plots(londres)
-    rio_fig = APIConnector.paint_plots(rio)
-
+#     madrid_fig = APIConnector.paint_plots(madrid)
+#     londres_fig = APIConnector.paint_plots(londres)
+#     rio_fig = APIConnector.paint_plots(rio)
     
 
 
