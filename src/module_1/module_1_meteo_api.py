@@ -108,7 +108,6 @@ class APIConnector:
             # Group by year and get stats
             grouped_df = working_df.groupby('year').agg([np.mean, np.var, np.std]).reset_index()
 
-        print(grouped_df)
         return grouped_df
 
 
