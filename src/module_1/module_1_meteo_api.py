@@ -30,35 +30,41 @@ def get_data_meteo_api(city, coordinates, start_date, end_date, vars):
     try:
         validate(data, schema_to_validate)
     except SchemaError as e:
-        print("Error en el API_JSON schema")
+        print(f"Error en el API_JSON schema{e}")
     finally:
-        df=pd.DataFrame(data=data['hourly'])
-        n_data = len(df)
-        city_name = city * n_data
-        df['city'] = city_name
-        time.sleep(10)
+        df=pd.DataFrame(data=data['daily'])
+        df['city'] = city
+        time.sleep(3)
     return df
 
+def data_parse(df, variables):
+    vars = [x.strip() for x in variables.split(',')]
+    resumen_df = df[['time']].copy()
+
+    for variable in vars:
+        modelos = [col for col in df.columns if variable in col]
+        promedio_por_dia = df[modelos].mean(axis=1)
+        resumen_df[variable] = promedio_por_dia
+
+    return resumen_df
 
 def main():
         # Variables iniciales
     COORDINATES = {
-    "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
-    "London": {"latitude": 51.507351, "longitude": -0.127758},
-    "Rio": {"latitude": -22.906847, "longitude": -43.172896},
+    "Madrid": {"latitude": 40.416775, "longitude": -3.703790}
     }
     start_date='1950-01-01'
     end_date='2023-08-30'
     VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
         #####
-    data_cities = []
     for i in COORDINATES.keys():
-        data_cities.append(get_data_meteo_api(city = i, coordinates = COORDINATES[i], start_date = start_date,
-                                              end_date = end_date, vars = VARIABLES))
-    meteo_data = pd.concat(data_cities, axis = 0)
-    meteo_data.head()
-
-    
+        data_cities = get_data_meteo_api(city = i, coordinates = COORDINATES[i], start_date = start_date,
+                                              end_date = end_date, vars = VARIABLES)
+        meteo_data_final = data_parse(data_cities, variables = VARIABLES)
+    print(meteo_data_final.head())
 
 if __name__ == "__main__":
+    start_time = time.time()
     main()
+    end_time = time.time()
+    print (f'Timepo de ejecutción: {end_time-start_time}s')
