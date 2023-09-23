@@ -14,48 +14,71 @@ VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
 
 class APIConnector:
 
-    url = ""
+    base = ""
 
     # Silly constructor
     def __init__(self):
-        self.url = "https://climate-api.open-meteo.com/v1/climate?"
+        self.base = "https://climate-api.open-meteo.com/v1/climate?"
 
     # Call api method, we'll see how to manage status_code
     def call_api(self, city: str):
         # URL inputs
-        lat = COORDINATES[city]["latitude"]
-        long = COORDINATES[city]["longitude"]
-        coords = f"latitude{lat}&longitude{long}"
+        lat = float(COORDINATES[city]["latitude"])
+        long = float(COORDINATES[city]["longitude"])
+        coords = f"latitude={lat}&longitude={long}"
         date_span = "&start_date=1950-01-01&end_date=2050-12-31"
         mode = f"&daily={VARIABLES}"
 
         # Final URL
-        self.url = self.url + coords + date_span + mode
+        url = self.base + coords + date_span + mode
+        
 
         # Response
-        response = requests.get(self.url)
+        response = requests.get(url)
         if response.status_code == 409:
             sleepy_cooloff = 0
             time.sleep(sleepy_cooloff)
-            response = requests.get(self.url)
+            response = requests.get(url)
         return response.json()
     
     # get_data_meteo_api, should return treated response
     def get_data_meteo_api(self, city: str):
         # Response JSON
         response = self.call_api(city)
+        
         # Treat response
         df_response = pd.DataFrame(response)
+        # print(df_response.head())
 
         return df_response
        
+    def validate_schema(json: dict):
+        schema = {
+            'latitude':float,
+            'longitude':float,
+            'generationtime_ms':float,
+            'utc_offset_seconds':int,
+            'timezone': object,
+            'timezone_abbreviation': object,
+            'elevation':float,
+            'daily_units':str,
+            'daily': list
+        }
+        for key, d_type in schema.items():
+            if key not in json:
+                return False
+            if not isinstance(json[key], d_type):
+                return False
+        return True
 
 
 def main():
-    madrid = APIConnector("Madrid")
-    londres = APIConnector("London")
-    rio = APIConnector("Rio")
-    raise NotImplementedError
+    connector = APIConnector()
+    df_madrid = connector.get_data_meteo_api("Madrid")
+    print(df_madrid.head().dtypes)
+    df_londres = connector.get_data_meteo_api("London")
+    df_rio = connector.get_data_meteo_api("Rio")
+    # raise NotImplementedError
 
 if __name__ == "__main__":
     main()
