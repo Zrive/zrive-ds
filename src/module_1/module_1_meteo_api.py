@@ -22,6 +22,8 @@ SLEEP_REQUEST = 1
 
 
 DATA_FOLDER_NAME = "Plots"
+if os.path.exists(DATA_FOLDER_NAME) is False:
+    os.makedirs(DATA_FOLDER_NAME)
 
 
 def get_data_meteo_api(city, start_date, end_date):
