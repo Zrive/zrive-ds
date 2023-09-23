@@ -123,38 +123,38 @@ class APIConnector:
         
         # Since the grouped df is multi indexed and we want to compare
         # every metric on their own (mean against mean, etc):
+        fig1, ax1 = plt.subplots(figsize=(9, 6))
+        fig2, ax2 = plt.subplots(figsize=(9, 6))
+        fig3, ax3 = plt.subplots(figsize=(9, 6))
+        
         if plot == "mean":
             for df in dfs:
                 y1 = df.loc[:, df.columns[1]] 
-                y2 = df[:, df.columns[4]]
-                y3 = df[: , df.columns[7]]
-            
-                fig, ax = plt.subplots(figsize=(9, 6))
-                ax.plot(x, y1)
-                ax.plot(x, y2)
-                ax.plot(x, y3)
+                y2 = df.loc[:, df.columns[4]]
+                y3 = df.loc[: , df.columns[7]]
+                        
+                ax1.plot(x, y1)
+                ax2.plot(x, y2)
+                ax3.plot(x, y3)
+                
         elif plot == "var":
             for df in dfs:
                 y1 = df.loc[:, df.columns[2]] 
-                y2 = df[:, df.columns[5]]
-                y3 = df[: , df.columns[8]]
+                y2 = df.loc[:, df.columns[5]]
+                y3 = df.loc[: , df.columns[8]]
             
-                fig, ax = plt.subplots(figsize=(9, 6))
-                ax.plot(x, y1)
-                ax.plot(x, y2)
-                ax.plot(x, y3)
+                ax1.plot(x, y1)
+                ax2.plot(x, y2)
+                ax3.plot(x, y3)
         else:
             for df in dfs:
                 y1 = df.loc[:, df.columns[3]] 
-                y2 = df[:, df.columns[6]]
-                y3 = df[: , df.columns[9]]
+                y2 = df.loc[:, df.columns[6]]
+                y3 = df.loc[: , df.columns[9]]
             
-                fig, ax = plt.subplots(figsize=(9, 6))
-                ax.plot(x, y1)
-                ax.plot(x, y2)
-                ax.plot(x, y3)
-
-        return fig
+                ax1.plot(x, y1)
+                ax2.plot(x, y2)
+                ax3.plot(x, y3)
 
 def main():
     connector = APIConnector()
