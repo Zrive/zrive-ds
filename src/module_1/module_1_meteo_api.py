@@ -112,7 +112,7 @@ class APIConnector:
 
 
     def paint_plots(df: pd.DataFrame):
-
+        
         pass
 
 
@@ -123,6 +123,8 @@ def main():
     df_londres = connector.get_data_meteo_api("London")
     df_rio = connector.get_data_meteo_api("Rio")
 
+    madrid = APIConnector.calc_stats(df_madrid)
+    
 
     
 
