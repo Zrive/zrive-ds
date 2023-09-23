@@ -57,20 +57,7 @@ def conf_interval(df):
     result['Upper_CI'] = result.apply(lambda row: row['mean'] + stats.t.ppf(1 - 0.05/ 2, df=len(df) - 1) * row['std'] / (len(df) ** 0.5), axis=1) 
     return result
 
-def graficar_bueno(df, variables):
-    vars = [x.strip() for x in variables.split(',')]
-    for variable in vars:
-        df_filtered = df[df["Indicadores"] == variable]
-        # Filtrar el DataFrame para incluir solo datos del primer día de cada mes
-        line = alt.Chart(df_filtered).mark_line().encode(x='time:T',y='Value', color = 'city:N')
-        interval = alt.Chart(df_filtered).mark_errorband(extent='ci').encode(x='time:T',y=alt.Y('Value:Q'),color='city:N')
-        title = alt.TitleParams(text=variable, align='center', fontSize=20)
-        final_chart = (line + interval).properties(title=title,width=600,height=400)
-        final_chart.save(f'{variable}_meteo.html')
-        # Mostrar el gráfico en pantalla (opcional)
-        #plt.show()
-
-def graficar_malo(df, variables):
+def graficar(df, variables):
     vars = [x.strip() for x in variables.split(',')]
     for variable in vars:
         df_filtered = df[df["Indicadores"] == variable]
@@ -83,7 +70,7 @@ def graficar_malo(df, variables):
         
         ax.set_xlabel('Year')
         ax.set_ylabel('Value')
-        ax.set_title('Value with Confidence Intervals by City')
+        ax.set_title(f'{variable} with Confidence Intervals by City')
         ax.legend(loc='upper left')
 
         fig.savefig(f'{variable}_meteo.jpg', format='jpg')
@@ -110,7 +97,7 @@ def main():
         variable_intervals['city'] = i
         data_cities.append(variable_intervals)
     meteo_data = pd.concat(data_cities, axis = 0)
-    graficar_malo(df = meteo_data, variables = VARIABLES)
+    graficar(df = meteo_data, variables = VARIABLES)
 
 if __name__ == "__main__":
     start_time = time.time()
