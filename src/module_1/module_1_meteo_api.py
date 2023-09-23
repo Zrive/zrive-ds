@@ -21,7 +21,7 @@ MODELS = (
 SLEEP_REQUEST = 1
 
 
-DATA_FOLDER_NAME = "Plots"
+DATA_FOLDER_NAME = "src/module_1/Plots"
 if os.path.exists(DATA_FOLDER_NAME) is False:
     os.makedirs(DATA_FOLDER_NAME)
 
@@ -54,7 +54,7 @@ def api_request(api_url):
             return data
 
         elif response.status_code == 404:
-            print("The data you requested does not exist. Tryng again")
+            print("The data you requested does not exist. Trying again")
 
         elif response.status_code == 401:
             print("You are not authorized to request this data. Trying again")
@@ -95,13 +95,13 @@ def main():
 
     cities = COORDINATES.keys()
 
+    list_variables = VARIABLES.split(",")
+    list_models = MODELS.split(",")
+
     for city in cities:
         plot_folder = f"{DATA_FOLDER_NAME}/{city}"
         if os.path.exists(plot_folder) is False:
             os.makedirs(plot_folder)
-
-        list_variables = VARIABLES.split(",")
-        list_models = MODELS.split(",")
 
         for variable in list_variables:
             for model in list_models:
