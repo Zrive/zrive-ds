@@ -24,7 +24,7 @@ def test_calc_stats_by_month():
     assert 'precipitation_sum' in res.columns
     assert 'soil_moisture_0_to_10cm_mean' in res.columns
 
-    
+
 
 def test_calc_stats_by_year():
     data = {
@@ -37,7 +37,7 @@ def test_calc_stats_by_year():
         'moist': [30.0, 32.0, 28.0, 29.0, 31.0, 33.0, 29.0, 30.0],
     }
     sample_df = pd.DataFrame(data)
-    res = calc_stats(sample_df, freq="monthly")
+    res = calc_stats(sample_df, freq="yearly")
 
     assert 'month' in res.columns
     assert 'temperature_2m_mean' in res.columns
