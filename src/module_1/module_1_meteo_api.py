@@ -103,6 +103,9 @@ def main():
         if os.path.exists(plot_folder) is False:
             os.makedirs(plot_folder)
 
+        api_url = get_data_meteo_api(city, start_date, end_date)
+        data_dict = api_request(api_url)
+
         for variable in list_variables:
             for model in list_models:
                 # model = "CMCC_CM2_VHR4"
@@ -111,10 +114,6 @@ def main():
                 print(city, model, variable)
 
                 data_key = f"{variable}_{model}"
-
-                api_url = get_data_meteo_api(city, start_date, end_date)
-
-                data_dict = api_request(api_url)
 
                 if data_dict:  # If code != 200, data_dict = None
                     data = data_dict["daily"][data_key]
