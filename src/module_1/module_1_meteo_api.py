@@ -71,26 +71,34 @@ def conf_interval(df):
 
 def graficar(df, variables):
     vars = [x.strip() for x in variables.split(",")]
-    for variable in vars:
+    num_vars = len(vars)
+    # Configurar el grid de subplots
+    num_cols = 1  # Una columna por gráfico
+    num_rows = num_vars  # Una fila por variable
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(10, 6*num_vars), sharex=True)
+    for i, variable in enumerate(vars):
         df_filtered = df[df["Indicadores"] == variable]
-        cities = df_filtered["city"].unique()
-        fig, ax = plt.subplots(figsize=(10, 6))
+        cities = df_filtered["city"].unique()    
+        # Seleccionar el eje adecuado en el grid
+        if num_vars > 1:
+            ax = axs[i]
+        else:
+            ax = axs
+        # Configurar el gráfico
+        ax.set_title(variable)  # Establecer el título del gráfico como la variable
         for city in cities:
             city_data = df_filtered[df_filtered["city"] == city]
+            # Dibujar el gráfico de líneas
             ax.plot(city_data["Year"], city_data["mean"], label=city)
-            ax.fill_between(
-                city_data["Year"],
-                city_data["Lower_CI"],
-                city_data["Upper_CI"],
-                alpha=0.3,
-            )
-
+            # Colorear el intervalo de confianza
+            ax.fill_between(city_data["Year"], city_data["Lower_CI"], city_data["Upper_CI"], alpha=0.1, facecolor='k')
+        # Agregar leyenda
         ax.set_xlabel("Year")
         ax.set_ylabel("Value")
+        ax.legend(loc="lower center")
         ax.set_title(f"{variable} with Confidence Intervals by City")
-        ax.legend(loc="upper left")
-
-        fig.savefig(f"{variable}_meteo.jpg", format="jpg")
+    plt.tight_layout()
+    fig.savefig(f"Meteo.jpg", format="jpg")
 
 
 def main():
@@ -115,7 +123,7 @@ def main():
         variable_intervals = conf_interval(df=viariable_data)
         variable_intervals["city"] = i
         data_cities.append(variable_intervals)
-        time.sleep(10)
+        time.sleep(3)
     meteo_data = pd.concat(data_cities, axis=0)
     graficar(df=meteo_data, variables=VARIABLES)
 
