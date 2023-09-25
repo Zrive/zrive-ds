@@ -104,7 +104,7 @@ def graficar(df, variables):
         ax.legend(loc="lower center")
         ax.set_title(f"{variable} with Confidence Intervals by City")
     plt.tight_layout()
-    fig.savefig(f"Meteo.jpg", format="jpg")
+    fig.savefig("Meteo.jpg", format="jpg")
 
 
 def main():
