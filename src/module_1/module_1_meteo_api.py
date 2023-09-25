@@ -75,10 +75,10 @@ def graficar(df, variables):
     # Configurar el grid de subplots
     num_cols = 1  # Una columna por gráfico
     num_rows = num_vars  # Una fila por variable
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(10, 6*num_vars), sharex=True)
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(10, 6 * num_vars), sharex=True)
     for i, variable in enumerate(vars):
         df_filtered = df[df["Indicadores"] == variable]
-        cities = df_filtered["city"].unique()    
+        cities = df_filtered["city"].unique()
         # Seleccionar el eje adecuado en el grid
         if num_vars > 1:
             ax = axs[i]
@@ -91,7 +91,13 @@ def graficar(df, variables):
             # Dibujar el gráfico de líneas
             ax.plot(city_data["Year"], city_data["mean"], label=city)
             # Colorear el intervalo de confianza
-            ax.fill_between(city_data["Year"], city_data["Lower_CI"], city_data["Upper_CI"], alpha=0.1, facecolor='k')
+            ax.fill_between(
+                city_data["Year"],
+                city_data["Lower_CI"],
+                city_data["Upper_CI"],
+                alpha=0.1,
+                facecolor="k",
+            )
         # Agregar leyenda
         ax.set_xlabel("Year")
         ax.set_ylabel("Value")
