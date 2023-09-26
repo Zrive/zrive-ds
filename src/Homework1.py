@@ -85,8 +85,9 @@ def _request_with_cooloff(
         # We got through the loop without error so we've received a valid response
         return response
 
+
 def test_request_with_cooloff():
-    monkypatch(requests, 'get', lambda x: MockResponse(200, 'OK'))
+    monkypatch(requests, "get", lambda x: MockResponse(200, "OK"))
 
 
 def request_with_cooloff(

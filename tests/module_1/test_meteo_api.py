@@ -3,7 +3,11 @@ import requests
 from unittest.mock import Mock
 import pytest
 
-from src.module_1.module_1_meteo_api import compute_variable_mean_and_std, VARIABLES, _request_with_cooloff
+from src.module_1.module_1_meteo_api import (
+    compute_variable_mean_and_std,
+    VARIABLES,
+    _request_with_cooloff,
+)
 
 
 def test_compute_variable_mean_and_std():
@@ -58,30 +62,34 @@ class MockResponse:
 
 def test_request_with_cooloff_200(monkeypatch):
     headers = {}
-    mocked_response = Mock(return_value=MockResponse('mocked_response', 200))
-    monkeypatch.setattr(requests, 'get', mocked_response)
-    response = _request_with_cooloff('mock_url', headers, num_attempts=10, payload=None)
+    mocked_response = Mock(return_value=MockResponse("mocked_response", 200))
+    monkeypatch.setattr(requests, "get", mocked_response)
+    response = _request_with_cooloff("mock_url", headers, num_attempts=10, payload=None)
     assert response.status_code == 200
-    assert response.json() == 'mocked_response'
+    assert response.json() == "mocked_response"
 
 
 def test_request_with_cooloff_404(monkeypatch):
     with pytest.raises(requests.exceptions.HTTPError):
         headers = {}
-        mocked_response = Mock(return_value=MockResponse('mocked_response', 404))
-        monkeypatch.setattr(requests, 'get', mocked_response)
-        response = _request_with_cooloff('mock_url', headers, num_attempts=10, payload=None)
+        mocked_response = Mock(return_value=MockResponse("mocked_response", 404))
+        monkeypatch.setattr(requests, "get", mocked_response)
+        response = _request_with_cooloff(
+            "mock_url", headers, num_attempts=10, payload=None
+        )
 
 
 def test_request_with_cooloff_429(monkeypatch, caplog):
-    """ After n_max_attemps, the function should also raise an exception"""
+    """After n_max_attemps, the function should also raise an exception"""
     with pytest.raises(requests.exceptions.HTTPError):
         headers = {}
-        mocked_response = Mock(return_value=MockResponse('mocked_response', 429))
-        monkeypatch.setattr(requests, 'get', mocked_response)
-        response = _request_with_cooloff('mock_url', headers, num_attempts=2, payload=None)
+        mocked_response = Mock(return_value=MockResponse("mocked_response", 429))
+        monkeypatch.setattr(requests, "get", mocked_response)
+        response = _request_with_cooloff(
+            "mock_url", headers, num_attempts=2, payload=None
+        )
         expected_msgs = [
             f"API return code {response.status_code} cooloff at {1}",
-            f"API return code {response.status_code} cooloff at {2}"
+            f"API return code {response.status_code} cooloff at {2}",
         ]
         assert [r.msg for r in caplog.records] == expected_msgs
