@@ -124,50 +124,53 @@ def calc_stats(df: pd.DataFrame) -> pd.DataFrame:
     return grouped_df
 
 
-def paint_plots(dfs: list, plot: str, freq="monthly"):
+def paint_plots(df: pd.DataFrame, city: str):
+    # It's all the same to use any to get the dates
+    x = df["Year"]
 
-    # Since the grouped df is multi indexed and we want to compare
-    # every metric on their own (mean against mean, etc):
+    # Plotting
     fig1, ax1 = plt.subplots(figsize=(9, 6))
-    fig2, ax2 = plt.subplots(figsize=(9, 6))
+    # fig2, ax2 = plt.subplots(figsize=(9, 6))
     fig3, ax3 = plt.subplots(figsize=(9, 6))
 
-    ax1.set_title(f"Temperature: {plot}")
-    ax2.set_title(f"Rain: {plot}")
-    ax3.set_title(f"Moisture: {plot}")
+    # Get the columns, since it is multiindexed, we check the first element
+    # of the tuple (variable_name, stat)
+    matching_temp = [col for col in df.columns if "temp" in col[0]]
+    matching_moist = [col for col in df.columns if "moist" in col[0]]
+    matching_precip = [col for col in df.columns if "precip" in col[0]]
 
-    if plot == "mean":
-        for df in dfs:
-            y1 = df.loc[:, df.columns[1]]
-            y2 = df.loc[:, df.columns[4]]
-            y3 = df.loc[:, df.columns[7]]
+    df_temp = df[matching_temp]
+    df_moist = df[matching_moist]
+    df_precip = df[matching_precip]
 
-            ax1.plot(x, y1)
-            ax2.plot(x, y2)
-            ax3.plot(x, y3)
 
-    elif plot == "var":
-        for df in dfs:
-            y1 = df.loc[:, df.columns[2]]
-            y2 = df.loc[:, df.columns[5]]
-            y3 = df.loc[:, df.columns[8]]
+    y1 = df_temp.iloc[:, df_temp.columns.get_level_values(1) == "mean"]
+    # y2 = df_moist.iloc[:, df_moist.columns.get_level_values(1) == "mean"]
+    y3 = df_precip.iloc[:, df_precip.columns.get_level_values(1) == "mean"]
 
-            ax1.plot(x, y1)
-            ax2.plot(x, y2)
-            ax3.plot(x, y3)
-    else:
-        for df in dfs:
-            y1 = df.loc[:, df.columns[3]]
-            y2 = df.loc[:, df.columns[6]]
-            y3 = df.loc[:, df.columns[9]]
+    std1 = df_temp.iloc[:, df_temp.columns.get_level_values(1) == "std"]
+    # std2 = df_moist.iloc[:, df_moist.columns.get_level_values(1) == "std"]
+    std3 = df_precip.iloc[:, df_precip.columns.get_level_values(1) == "std"]
+    
+    ax1.plot(x, y1)
+    ax1.set_ylim(10, 30)
+    ax1.plot(x, y1 + std1)
+    ax1.plot(x, y1 - std1)
+    ax1.set_title(f"{city} - Temperature")
+    ax1.legend(MODELS.split(','))
+    
 
-            ax1.plot(x, y1)
-            ax2.plot(x, y2)
-            ax3.plot(x, y3)
+    # ax2.plot(x, y2)
+    # ax2.plot(x, y2 + std2)
+    # ax2.plot(x, y2 - std2)
 
-    ax1.legend(["Madrid", "London", "Rio"])
-    ax2.legend(["Madrid", "London", "Rio"])
-    ax3.legend(["Madrid", "London", "Rio"])
+
+    ax3.plot(x, y3)
+    ax3.set_ylim(0, 10)
+    ax3.plot(x, y3 + std3)
+    ax3.plot(x, y3 - std3)
+    ax3.set_title(f"{city} - Precipitation")
+    ax3.legend(MODELS.split(','))
 
 
 def main():
