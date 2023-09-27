@@ -151,6 +151,7 @@ def paint_plots(df: pd.DataFrame, city: str):
     # std2 = df_moist.iloc[:, df_moist.columns.get_level_values(1) == "std"]
     std3 = df_precip.iloc[:, df_precip.columns.get_level_values(1) == "std"]
 
+    # Plot painting
     ax1.plot(x, y1)
     ax1.set_ylim(10, 30)
     ax1.plot(x, y1 + std1)
