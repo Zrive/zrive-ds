@@ -3,6 +3,7 @@ import requests
 import matplotlib.pyplot as plt
 import time
 import itertools
+from typing import List
 
 COORDINATES = {
     "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
@@ -81,7 +82,8 @@ class APIConnector:
         print(df_response.head())
         return df_response
 
-def get_df_index():
+
+def get_df_index() -> List:
     models = MODELS.split(',')
     variables = VARIABLES.split(',')
     unjoined_index = list(itertools.product(variables, models))
@@ -92,24 +94,32 @@ def get_df_index():
 
 
 # Calculate mean and dispersion (std & variance)
+    # Calculate mean and dispersion
 def calc_stats(df: pd.DataFrame) -> pd.DataFrame:
+    index = get_df_index()
+
+    models = MODELS.split(',')
     # Get data from df
-    time = df["daily"]
-    temp = df["daily"]
-    prec = df["daily"]
-    moist = df["daily"]
-
-    # New df with data in cols
-    working_df = pd.DataFrame()
-    working_df["date"] = time
-    working_df["temperature_2m_mean"] = temp
-    working_df["precipitation_sum"] = prec
-    working_df["soil_moisture_0_to_10cm_mean"] = moist
-    working_df["date"] = pd.to_datetime(working_df["date"])
-    working_df["year"] = working_df["date"].dt.year
-
+    time = df["daily"]["time"]
+    df_models = pd.DataFrame() 
+    df_models["Date"] = time
+    df_models["Year"] = pd.to_datetime(df_models["Date"]).dt.year
+    df_models.drop(columns="Date", inplace=True)
+    
+    # Get data from index
+    for item in index:
+        if models[0] in item:
+            col_name = item.replace(models[0], 'model1')
+            df_models[col_name] = df["daily"][item]
+        elif models[1] in item:
+            col_name = item.replace(models[1], 'model2')
+            df_models[col_name] = df["daily"][item]
+        elif models[2] in item:
+            col_name = item.replace(models[2], 'model3')
+            df_models[col_name] = df["daily"][item]
+    
     # Group by year and get stats
-    grouped_df = working_df.groupby("year").agg(['mean', 'std']).reset_index()
+    grouped_df = df_models.groupby("Year").agg(['mean', 'std']).reset_index()
 
     return grouped_df
 
