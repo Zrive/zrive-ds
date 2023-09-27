@@ -79,7 +79,6 @@ class APIConnector:
         # raise Exception(f"Invalid schema for response {response}")
         # Treat response
         df_response = pd.DataFrame(response)
-        print(df_response.head())
         return df_response
 
 
@@ -158,7 +157,7 @@ def paint_plots(df: pd.DataFrame, city: str):
     ax1.plot(x, y1 - std1)
     ax1.set_title(f"{city} - Temperature")
     ax1.legend(MODELS.split(","))
-    ax1.savefig(f"{city}_temp.png")
+    fig1.savefig(f"../figs/{city}_temp.png")
 
     # ax2.plot(x, y2)
     # ax2.plot(x, y2 + std2)
@@ -170,7 +169,8 @@ def paint_plots(df: pd.DataFrame, city: str):
     ax3.plot(x, y3 - std3)
     ax3.set_title(f"{city} - Precipitation")
     ax3.legend(MODELS.split(","))
-    ax3.savefig(f"{city}_precip.png")
+    fig3.savefig(f"../figs/{city}_precip.png")
+
 
 
 def main():
