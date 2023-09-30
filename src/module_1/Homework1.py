@@ -86,6 +86,9 @@ def _request_with_cooloff(
         return response
 
 
+def test_request_with_cooloff():
+    monkypatch(requests, "get", lambda x: MockResponse(200, "OK"))
+
 
 def request_with_cooloff(
     url: str,
