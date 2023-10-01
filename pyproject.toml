@@ -16,6 +16,9 @@ black = "^23.7.0"
 flake8 = "^6.1.0"
 mypy = "^1.5.1"
 pytest = "^7.4.0"
+pyarrow = "^13.0.0"
+seaborn = "^0.13.0"
+boto3 = "^1.28.57"
 
 
 [build-system]
