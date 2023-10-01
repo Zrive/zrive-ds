@@ -172,7 +172,6 @@ def paint_plots(df: pd.DataFrame, city: str):
     fig3.savefig(f"../figs/{city}_precip.png")
 
 
-
 def main():
     connector = APIConnector()
 
