@@ -1,5 +1,7 @@
 import boto3
 import os
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # AWS credentials
 aws_access_key_id = 'AKIAXN64CPXKVY56HGZZ'
@@ -33,4 +35,13 @@ for obj in response.get('Contents', []):
     local_file_path = os.path.join(local_directory, os.path.basename(s3_object_key))
     s3.download_file(s3_bucket, s3_object_key, local_file_path)
 
+# Retrieving the data
+
+path_data = 'Users/alvarochapela/Desktop/ZRIVE/ProyectosZrive/zrive-ds/Module2Data'
+
+orders = pd.read_parquet(f"{path_data}/orders.parquet")
+users = pd.read_parquet(f"{path_data}/users.parquet")
+regulars = pd.read_parquet(f"{path_data}/regulars.parquet")
+inventory = pd.read_parquet(f"{path_data}/inventory.parquet")
+abandoned_carts = pd.read_parquet(f"{path_data}/abandoned_carts.parquet")
 
