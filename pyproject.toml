@@ -21,6 +21,9 @@ seaborn = "^0.13.0"
 boto3 = "^1.28.57"
 
 
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.25.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

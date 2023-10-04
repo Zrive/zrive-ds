@@ -3,9 +3,12 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # AWS credentials
-aws_access_key_id = 'AKIAXN64CPXKVY56HGZZ'
-aws_secret_access_key = '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'
+aws_access_key_id = os.environ['aws_access_key_user']
+aws_secret_access_key = os.environ['aws_secret_key']
 
 # Initialize a session with boto3
 session = boto3.Session(
@@ -37,7 +40,7 @@ for obj in response.get('Contents', []):
 
 # Retrieving the data
 
-path_data = 'Users/alvarochapela/Desktop/ZRIVE/ProyectosZrive/zrive-ds/Module2Data'
+path_data = '/Users/alvarochapela/Documents/DATOS_ZRIVE/Module2Data'
 
 orders = pd.read_parquet(f"{path_data}/orders.parquet")
 users = pd.read_parquet(f"{path_data}/users.parquet")
@@ -45,3 +48,9 @@ regulars = pd.read_parquet(f"{path_data}/regulars.parquet")
 inventory = pd.read_parquet(f"{path_data}/inventory.parquet")
 abandoned_carts = pd.read_parquet(f"{path_data}/abandoned_carts.parquet")
 
+# Analysis
+
+n_regulars = regulars.groupby('user_id')['variant_id'].nunique().reset_index().rename(columns={'variant_id': 'n_regulars'})
+users = users.merge(n_regulars, on='user_id', how='left').fillna({'n_regulars': 0})
+
+users['n_regulars'].hist(bins=100, log=True)
