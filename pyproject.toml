@@ -20,6 +20,7 @@ pyarrow = "^13.0.0"
 seaborn = "^0.13.0"
 boto3 = "^1.28.57"
 matplotlib-venn = "^0.11.9"
+nbconvert = "^7.10.0"
 
 
 [tool.poetry.group.dev.dependencies]

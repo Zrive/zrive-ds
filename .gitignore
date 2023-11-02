@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Jupyter notebook from module2 solution
-.ipynb 
-
 # Distribution / packaging
 .Python
 build/
