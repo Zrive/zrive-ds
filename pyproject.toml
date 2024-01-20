@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zrive-ds"
+name = "zrive-ds-ernesto"  # Cambia el nombre del proyecto aquí
 version = "0.1.0"
 description = "Project for the program Zrive Applied Data Science"
 authors = ["Guille Barquero <gb@zriveapp.com>"]
@@ -10,12 +10,13 @@ python = "^3.11"
 pandas = "^2.0.3"
 matplotlib = "^3.7.2"
 numpy = "^1.25.2"
+# sklearn = "^0.0.post7"
 requests = "^2.31.0"
 black = "^23.7.0"
 flake8 = "^6.1.0"
 mypy = "^1.5.1"
 pytest = "^7.4.0"
-
+scikit-learn = "^1.3.2"
 
 [build-system]
 requires = ["poetry-core"]
