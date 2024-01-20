@@ -51,11 +51,7 @@ def call_api(city: str, model: str) -> dict:
     # Check if the status code is 200
     if response.status_code != 200:
         if response.status_code == 429:
-            reset_time = int(response.headers.get("x-ratelimit-reset", 0))
-            print(
-                f"API rate limit exceeded. "
-                f"Requests will be available after {reset_time} seconds."
-            )
+            print("API rate limit exceeded.")
             raise Exception("API rate limit exceeded")
         else:
             print(f"Unexpected status code: {response.status_code}")
