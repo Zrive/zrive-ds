@@ -1,6 +1,8 @@
 import requests
 import time
 from datetime import datetime, timedelta
+import pandas as pd
+
 
 API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 VARIABLES = "temperature_2m_mean,precipitation_sum,soil_moisture_0_to_10cm_mean"
@@ -14,34 +16,31 @@ def get_data_meteo_api():
     results = {}
     end_date = "2024-01-10"
     start_date = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=30)).strftime("%Y-%m-%d")
-    
     for city, coords in COORDINATES.items():
+        print("CITY: ", city)
         params = {
             'latitude': coords['latitude'],
             'longitude': coords['longitude'],
             'start_date': start_date,
             'end_date': end_date,
-            'variables': VARIABLES
+            "models": ["CMCC_CM2_VHR4"],
+            'daily': VARIABLES
         }
-        url = API_URL + '&'.join(f'{key}={value}' for key, value in params.items())
 
         try:
-            response = requests.get(url)
+            response = requests.get(API_URL, params=params)
             if response.status_code == 429:
-                time.sleep(10)  # Wait longer if rate limit is reached
-                response = requests.get(url)  # Retry the request
+                time.sleep(10)  # Wait longer if rat t is reached
+                response = requests.get(API_URL, params=params)  # Retry the request
             if response.status_code != 200:
                 results[city] = f"Error: Received status code {response.status_code}"
             else:
                 data = response.json()
-                print(f"Raw JSON Data for {city}: {data}")  # Print the raw JSON data
+                data = data['daily']
+                #print(f"Raw JSON Data for {city}: {data}")  # Print the raw JSON data
                 # Attempt to extract the desired data
-                desired_data = {
-                    'temperature_2m_mean': data.get('temperature_2m_mean', 'Not available'),
-                    'precipitation_sum': data.get('precipitation_sum', 'Not available'),
-                    'soil_moisture_0_to_10cm_mean': data.get('soil_moisture_0_to_10cm_mean', 'Not available')
-                }
-                results[city] = desired_data
+                
+                results[city] = pd.DataFrame(data)
         except requests.exceptions.RequestException as e:
             results[city] = f"API request failed: {e}"
         finally:
@@ -51,4 +50,6 @@ def get_data_meteo_api():
 
 # Ejemplo de uso
 all_city_data = get_data_meteo_api()
-print(all_city_data)
+for city, df in all_city_data.items():
+    print(city)
+    print(df)
