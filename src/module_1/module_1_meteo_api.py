@@ -1,4 +1,4 @@
-# import requests
+import requests
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,16 +19,6 @@ MODELS = [
 
 years = pd.date_range(start="1950-01-01", end="2050-12-31")
 
-JSON = {
-    "time": years,
-    "temperature_2m_mean": np.random.uniform(low=0, high=30, size=(len(years),)),
-    "precipitation_sum": np.random.uniform(low=0, high=10, size=(len(years),)),
-    "soil_moisture_0_to_10cm_mean": np.random.uniform(
-        low=0, high=1, size=(len(years),)
-    ),
-}
-
-
 API_URL = "https://climate-api.open-meteo.com/v1/climate"
 COORDINATES = {
     "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
@@ -46,20 +36,31 @@ def get_data_meteo_api(city: str) -> None:
 
 
 def call_api(city: str, model: str) -> dict:
-    """parameters = {
+    parameters = {
         "latitude": COORDINATES[city]["latitude"],
         "longitude": COORDINATES[city]["longitude"],
-        "start_date": "2020-01-01",
-        "end_date": "2020-01-11",
+        "start_date": "1950-01-01",
+        "end_date": "2050-12-31",
         "model": model,
         "timezone": "Europe/Berlin",
         "daily": VARIABLES,
-    }"""
+    }
+    
+    response = requests.get(url=API_URL, params=parameters)
+
+    # Check if the status code is 200
+    if response.status_code != 200:
+        if response.status_code == 429:
+            reset_time = int(response.headers.get('x-ratelimit-reset', 0))
+            print(f"API rate limit exceeded. Requests will be available after {reset_time} seconds.")
+            raise Exception("API rate limit exceeded")
+        else:
+            print(f"Unexpected status code: {response.status_code}")
+            raise Exception("Unexpected status code")
 
     # Parse the JSON response
     try:
-        # data = response.json()['daily']
-        data = JSON
+        data = response.json()['daily']
     except (ValueError, KeyError) as e:
         print(f"Error parsing API response: {e}")
         raise
