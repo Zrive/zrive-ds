@@ -1,8 +1,9 @@
 import requests
 import time
-from typing import Dict, Union, Optional, Any
+from typing import Dict, List, Optional, Any
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# import pandas as pd
 
 API_URL = "https://climate-api.open-meteo.com/v1/climate?"
 
@@ -43,7 +44,9 @@ def get_api_data(
     return None
 
 
-def get_data_meteo_api(city, start_date, end_date, models=MODELS):
+def get_data_meteo_api(
+    city: str, start_date: str, end_date: str, models: List[str] = MODELS
+) -> pd.DataFrame:
     params = {
         **COORDINATES[city],
         "start_date": start_date,
@@ -51,21 +54,32 @@ def get_data_meteo_api(city, start_date, end_date, models=MODELS):
         "models": models,
         "daily": VARIABLES.split(","),
     }
-    data = get_api_data(API_URL, params=params)
-    """
-    cosas que me importan de la respuesta:
-    - daily_units (dict) -> Es un diccionario con las unidades de las variables
-    - daily (dict) -> Es un diccionario con las variables
 
-    precauciones con:
-    - Hay que tener en cuenta que las variables pueden no estar disponibles
-        para todos los modelos
-    """
-    print(data)
+    api_data = get_api_data(API_URL, params=params)
+    if api_data is None:
+        return
+    df = pd.DataFrame(api_data["daily"])
+    df["time"] = pd.to_datetime(df["time"])
+    df["year"] = df["time"].dt.year
+    df_yearly = df.groupby("year").mean().reset_index()
+    print(df_yearly)
+    return df_yearly
+
+
+def plot_data():
+    pass
 
 
 def main():
-    response = get_data_meteo_api("Madrid", "2020-01-01", "2020-01-31", MODELS[:2])
+    START_DATE = "1950-01-01"
+    END_DATE = "2050-12-31"
+    madrid_df = get_data_meteo_api("Madrid", START_DATE, END_DATE, MODELS)
+    print(madrid_df)
+    london_df = get_data_meteo_api("London", START_DATE, END_DATE, MODELS)
+    print(london_df)
+    rio_df = get_data_meteo_api("Rio", START_DATE, END_DATE, MODELS)
+    print(rio_df)
+
     # print(response)
 
 
