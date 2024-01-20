@@ -110,6 +110,7 @@ def plot_variable_by_model_city(
         ax[idx].legend(df["city"].unique())
 
     fig.savefig(f"./src/module_1/plot_images/{stat}_{variable}_yearly.png")
+    return fig
 
 
 def plot_variable_time_series(
@@ -147,6 +148,7 @@ def plot_variable_time_series(
 
     fig.tight_layout()
     fig.savefig(f"./src/module_1/plot_images/{variable}_time_series.png")
+    return fig
 
 
 def main():
