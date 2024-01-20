@@ -45,14 +45,17 @@ def call_api(city: str, model: str) -> dict:
         "timezone": "Europe/Berlin",
         "daily": VARIABLES,
     }
-    
+
     response = requests.get(url=API_URL, params=parameters)
 
     # Check if the status code is 200
     if response.status_code != 200:
         if response.status_code == 429:
-            reset_time = int(response.headers.get('x-ratelimit-reset', 0))
-            print(f"API rate limit exceeded. Requests will be available after {reset_time} seconds.")
+            reset_time = int(response.headers.get("x-ratelimit-reset", 0))
+            print(
+                f"API rate limit exceeded. "
+                f"Requests will be available after {reset_time} seconds."
+            )
             raise Exception("API rate limit exceeded")
         else:
             print(f"Unexpected status code: {response.status_code}")
@@ -60,7 +63,7 @@ def call_api(city: str, model: str) -> dict:
 
     # Parse the JSON response
     try:
-        data = response.json()['daily']
+        data = response.json()["daily"]
     except (ValueError, KeyError) as e:
         print(f"Error parsing API response: {e}")
         raise
