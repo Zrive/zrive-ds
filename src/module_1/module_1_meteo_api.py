@@ -1,7 +1,11 @@
 """ This is a dummy example """
 
 def main():
-    raise NotImplementedError
+    print("hola")
+  #  raise NotImplementedError
+
+
+
 
 if __name__ == "__main__":
     main()
