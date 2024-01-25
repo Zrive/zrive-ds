@@ -1,0 +1,47 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+# Leer el archivo .parquet
+df_inventory = pd.read_parquet('local_data/inventory.parquet')
+df_orders = pd.read_parquet('local_data/orders.parquet')
+df_abandoned = pd.read_parquet('local_data/abandoned_carts.parquet')
+
+
+'''''
+# Selecciona solo columnas numéricas
+df_numeric = df.select_dtypes(include=[np.number])
+
+# Calcula la matriz de correlación solo con columnas numéricas
+correlation_matrix = df_numeric.corr()
+print(correlation_matrix)
+
+# Ahora, `df` es tu DataFrame y puedes hacer un análisis exploratorio básico.
+# Por ejemplo, para obtener las estadísticas descriptivas:
+print(df.describe())
+
+# Crear un heatmap de las correlaciones
+sns.heatmap(correlation_matrix, annot=True)
+plt.show()
+'''
+
+
+
+
+#numero de compras por producto
+exploded_items = df_orders['ordered_items'].explode()
+item_counts = exploded_items.value_counts()
+
+# Convertimos la serie de recuentos en un DataFrame con reset_index
+item_counts_df_oders = item_counts.reset_index()
+item_counts_df_oders.columns = ['product_id', 'number_of_orders']
+
+total_orders = len(df_orders)
+
+# Agregamos la columna de probabilidad de compra dividiendo por el número total de órdenes
+item_counts_df_oders['purchase_probability'] = item_counts_df_oders['number_of_orders'] / total_orders
+
+# Mostramos los primeros elementos para verificar
+print(item_counts_df_oders.head())
