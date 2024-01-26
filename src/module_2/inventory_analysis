@@ -4,57 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-# Leer el archivo .parquet
-df_inventory = pd.read_parquet('local_data/inventory.parquet')
-df_orders = pd.read_parquet('local_data/orders.parquet')
-df_abandoned = pd.read_parquet('local_data/abandoned_carts.parquet')
-
-
-'''''
-# Selecciona solo columnas numéricas
-df_numeric = df.select_dtypes(include=[np.number])
-
-# Calcula la matriz de correlación solo con columnas numéricas
-correlation_matrix = df_numeric.corr()
-print(correlation_matrix)
-
-# Ahora, `df` es tu DataFrame y puedes hacer un análisis exploratorio básico.
-# Por ejemplo, para obtener las estadísticas descriptivas:
-print(df.describe())
-
-# Crear un heatmap de las correlaciones
-sns.heatmap(correlation_matrix, annot=True)
-plt.show()
-'''
-
-
-
-
-#numero de compras por producto
-exploded_items = df_orders['ordered_items'].explode()
-item_counts = exploded_items.value_counts()
-
-# Convertimos la serie de recuentos en un DataFrame con reset_index
-item_counts_df_oders = item_counts.reset_index()
-item_counts_df_oders.columns = ['variant_id', 'number_of_orders']
-
-total_orders = len(df_orders)
-
-# Agregamos la columna de probabilidad de compra dividiendo por el número total de órdenes
-item_counts_df_oders['purchase_probability'] = item_counts_df_oders['number_of_orders'] / total_orders
-
-# Unir los DataFrames en la columna 'product_id'
-df_orders_combined_inventory= pd.merge(item_counts_df_oders, df_inventory, on='variant_id', how='inner')
-
-print(df_orders_combined_inventory.head()) 
-
-
-
 def check_product_id(product_id, dataframe):
     return 1 if product_id in dataframe['variant_id'].values else 0
-
-
-
 
 def make_corr_matrix_and_statictics(dataframe):
  
@@ -66,5 +17,97 @@ def make_corr_matrix_and_statictics(dataframe):
  sns.heatmap(corr_matrix, annot=True)
  plt.show()
 
-make_corr_matrix_and_statictics(df_orders_combined_inventory)
+def freq_encoding_vendor_product_type(dataframe):
+# Calcular las frecuencias de aparición de cada categoría en 'vendor'
+ vendor_freq = df_orders_combined_inventory['vendor'].value_counts() / len(df_orders_combined_inventory)
+
+ # Calcular las frecuencias de aparición de cada categoría en 'product_type'
+ product_type_freq = df_orders_combined_inventory['product_type'].value_counts() / len(df_orders_combined_inventory)
+
+ # Mapear las frecuencias al DataFrame original
+ df_orders_combined_inventory['vendor_freq'] = df_orders_combined_inventory['vendor'].map(vendor_freq)
+ df_orders_combined_inventory['product_type_freq'] = df_orders_combined_inventory['product_type'].map(product_type_freq)
+
+ # Ahora, df tiene dos nuevas columnas: 'vendor_freq' y 'product_type_freq' con la frecuencia codificada
+   
+def convert_unix_to_readable(df, column_name):
+    df[column_name] = pd.to_datetime(df[column_name], unit='ms')
+    return df
+
+def hours_vs_orders_plot(dataframe,hours_feature_name):
+ "contrastar diferentes horas con numero de oders"
+
+ dataframe['hour_of_day'] = dataframe[hours_feature_name].dt.hour
+ purchases_by_hour = dataframe.groupby('hour_of_day').size()
+ df_purchases_by_hour = purchases_by_hour.reset_index(name='number_of_purchases')
+
+ plt.figure(figsize=(14, 7))
+ plt.bar(df_purchases_by_hour['hour_of_day'], df_purchases_by_hour['number_of_purchases'])
+ plt.xlabel('Hour of Day')
+ plt.ylabel('Number of Purchases')
+ plt.title('Relationship between Hour of Day and Number of Purchases')
+ plt.xticks(df_purchases_by_hour['hour_of_day'])
+ plt.grid(True)
+ plt.show() 
+
+def dates_vs_orders_plot(dataframe,dates_feature_name):
+
+ dataframe['year_month'] = dataframe[dates_feature_name].dt.to_period('M')
+ purchases_by_month = dataframe.groupby('year_month').size()
+
+ df_purchases_by_month = purchases_by_month.reset_index(name='number_of_purchases')
+
+ plt.figure(figsize=(14, 7))
+ plt.plot(df_purchases_by_month['year_month'].astype(str), df_purchases_by_month['number_of_purchases'], marker='o')
+ plt.xlabel('Year-Month')
+ plt.ylabel('Number of Purchases')
+ plt.title('Monthly Number of Purchases Over Time')
+ plt.xticks(rotation=90)
+ plt.tight_layout()
+ plt.grid(True)
+ plt.show()
+
+def main():
+ 
+ df_inventory = pd.read_parquet('local_data/inventory.parquet')
+ df_orders = pd.read_parquet('local_data/orders.parquet')
+ df_abandoned = pd.read_parquet('local_data/abandoned_carts.parquet')
+
+ "crear dataframe combinando prob de compra con preciosy otras ftrs"
+
+ #numero de compras por producto
+ exploded_items = df_orders['ordered_items'].explode()
+ item_counts = exploded_items.value_counts()
+ item_counts_df_oders = item_counts.reset_index()
+ item_counts_df_oders.columns = ['variant_id', 'number_of_orders']
+ total_orders = len(df_orders)
+
+ # prob de compra dividiendo por el número total de órdenes
+ item_counts_df_oders['purchase_probability'] = item_counts_df_oders['number_of_orders'] / total_orders
+
+ # Unir los DataFrames en la columna 'product_id'
+ df_orders_combined_inventory= pd.merge(item_counts_df_oders, df_inventory, on='variant_id', how='inner')
+
+ # make_corr_matrix_and_statictics(df_orders_combined_inventory)
+ # print(df_orders_combined_inventory.head()) 
+ 
+ df_orders = convert_unix_to_readable(df_orders, 'created_at')
+ df_orders = convert_unix_to_readable(df_orders, 'order_date')
+ #print(df_orders.head())
+
+ #hours_vs_orders_plot(df_orders,'created_at')
+ #dates_vs_orders_plot(df_orders,'order_date')
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
 
