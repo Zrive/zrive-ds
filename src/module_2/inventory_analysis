@@ -67,11 +67,64 @@ def dates_vs_orders_plot(dataframe,dates_feature_name):
  plt.grid(True)
  plt.show()
 
+
+def count_nulls(dataframe, column_name):
+    return dataframe[column_name].isna().sum()
+
+def drop_rows_where_all_null(dataframe, columns):
+    return dataframe.dropna(subset=columns, how='all')
+
+def df_families_members_stats():
+
+ # Filtramos el DataFrame para excluir filas donde cualquiera de los conteos es nulo
+ df_filtered = df_users.dropna(subset=['count_adults', 'count_children', 'count_babies', 'count_pets'])
+
+ # Filtramos df_filtered para eliminar filas donde 'count_adults' es 0 pero las otras columnas no son nulas
+ df_filtered = df_filtered[~((df_filtered['count_adults'] == 0) & 
+                            df_filtered['count_children'].notna() & 
+                            df_filtered['count_babies'].notna() & 
+                            df_filtered['count_pets'].notna())]
+
+ # Calculamos el recuento total de familias después de filtrar
+ total_families_filtered = len(df_filtered)
+
+ # Calculamos el porcentaje de familias que tienen al menos un adulto, un niño, un bebé, etc.
+ stats_percentage_of_families = {
+    'families_with_adults': (df_filtered['count_adults'] > 0).sum() / total_families_filtered * 100,
+    'families_with_children': (df_filtered['count_children'] > 0).sum() / total_families_filtered * 100,
+    'families_with_babies': (df_filtered['count_babies'] > 0).sum() / total_families_filtered * 100,
+    'families_with_pets': (df_filtered['count_pets'] > 0).sum() / total_families_filtered * 100
+ }
+
+ # Creamos una gráfica de barras para visualizar estos porcentajes
+ plt.figure(figsize=(10, 6))
+ bars = plt.bar(stats_percentage_of_families.keys(), stats_percentage_of_families.values(), color='skyblue')
+
+ # Añadir etiquetas a cada barra
+ for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval, round(yval, 2), va='bottom', ha='center')
+
+ plt.xlabel('Categoría')
+ plt.ylabel('Porcentaje de familias (%)')
+ plt.title('Porcentaje de Familias con Niños, Bebés y Mascotas (Excluyendo Nulos)')
+ plt.ylim(0, 100)
+ plt.show()
+
+ # Imprimir recuentos para referencia
+ print("Total de familias (excluyendo nulos):", total_families_filtered)
+ print("Familias con adultos:", (df_filtered['count_adults'] > 0).sum())
+ print("Familias con niños:", (df_filtered['count_children'] > 0).sum())
+ print("Familias con bebés:", (df_filtered['count_babies'] > 0).sum())
+ print("Familias con mascotas:", (df_filtered['count_pets'] > 0).sum())
+ 
+
 def main():
  
  df_inventory = pd.read_parquet('local_data/inventory.parquet')
  df_orders = pd.read_parquet('local_data/orders.parquet')
  df_abandoned = pd.read_parquet('local_data/abandoned_carts.parquet')
+ df_users = pd.read_parquet('local_data/users.parquet')
 
  "crear dataframe combinando prob de compra con preciosy otras ftrs"
 
@@ -88,8 +141,8 @@ def main():
  # Unir los DataFrames en la columna 'product_id'
  df_orders_combined_inventory= pd.merge(item_counts_df_oders, df_inventory, on='variant_id', how='inner')
 
- # make_corr_matrix_and_statictics(df_orders_combined_inventory)
- # print(df_orders_combined_inventory.head()) 
+ #make_corr_matrix_and_statictics(df_orders_combined_inventory)
+ print(df_orders_combined_inventory.head()) 
  
  df_orders = convert_unix_to_readable(df_orders, 'created_at')
  df_orders = convert_unix_to_readable(df_orders, 'order_date')
@@ -97,10 +150,46 @@ def main():
 
  #hours_vs_orders_plot(df_orders,'created_at')
  #dates_vs_orders_plot(df_orders,'order_date')
+ #hours_vs_orders_plot(df_abandoned,'created_at')
+
+ # Columnas a verificar
+ columns_to_check = ['count_people', 'count_adults', 'count_children', 'count_babies', 'count_pets']
+ df_cleaned = drop_rows_where_all_null(df_users, columns_to_check)
+ 
+ #print(count_nulls(df_users,'count_people'))
+ #print(df_users['count_people'].size)
+
+ #print(count_nulls(df_cleaned,'count_people'))
+ #print(df_cleaned['count_people'].size)
+ 
+  # Código para generar el gráfico de recuento de orders por vendor
+ vendor_order_counts = df_orders_combined_inventory.groupby('vendor')['number_of_orders'].sum().sort_values(ascending=False)
+ plt.figure(figsize=(15, 8))  # Aumentamos el tamaño de la figura
+ vendor_bars = plt.bar(vendor_order_counts.index, vendor_order_counts.values, color='skyblue')
+ plt.xlabel('Vendor')
+ plt.ylabel('Número de Orders')
+ plt.title('Número de Orders por Vendor')
+ plt.xticks(rotation=90)  # Rotamos las etiquetas 90 grados para evitar superposición
+ for bar in vendor_bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, height, int(height), ha='center', va='bottom')
+ plt.tight_layout()  # Ajustamos el layout para que no cortemos las etiquetas
+ plt.show()
 
 
-
-
+ # Código para generar el gráfico de recuento de orders por product type
+ product_type_order_counts = df_orders_combined_inventory.groupby('product_type')['number_of_orders'].sum().sort_values(ascending=False)
+ plt.figure(figsize=(15, 8))  # Aumentamos el tamaño de la figura
+ product_type_bars = plt.bar(product_type_order_counts.index, product_type_order_counts.values, color='orange')
+ plt.xlabel('Product Type')
+ plt.ylabel('Número de Orders')
+ plt.title('Número de Orders por Product Type')
+ plt.xticks(rotation=90)  # Rotamos las etiquetas 90 grados para evitar superposición
+ for bar in product_type_bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, height, int(height), ha='center', va='bottom')
+ plt.tight_layout()  # Ajustamos el layout para que no cortemos las etiquetas
+ plt.show()
 
 
 
