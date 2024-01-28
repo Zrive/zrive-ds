@@ -161,6 +161,7 @@ def main():
 
  #print(count_nulls(df_cleaned,'count_people'))
  #print(df_cleaned['count_people'].size)
+ #def df_families_members_stats()
  
   # Código para generar el gráfico de recuento de orders por vendor
  vendor_order_counts = df_orders_combined_inventory.groupby('vendor')['number_of_orders'].sum().sort_values(ascending=False)
