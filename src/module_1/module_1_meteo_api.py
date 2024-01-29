@@ -24,7 +24,7 @@ MODELS = ["CMCC_CM2_VHR4",
 MAX_CALL_ATTEMPTS = 50
 
 # Logging configuration
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def validate_response(response: Response) -> bool:
     # Check if the response is a dictionary
@@ -53,7 +53,7 @@ def call_api (params: dict):
     :return: The API response if successful, None otherwise.
     """
     call_attempts= 0 
-    backoff_time = 1  
+    backoff_time = 60 
     while call_attempts < MAX_CALL_ATTEMPTS:
         try:
             response = requests.get(API_URL, params=params)
@@ -63,21 +63,22 @@ def call_api (params: dict):
             elif response.status_code == 429:
                 # Use the Retry-After header to determine the cool-off time
                 cool_off_time = response.headers.get("Retry-After",backoff_time)
-                logging.info(f"Rate limit exceeded. Waiting for {cool_off_time} seconds.")
-                logging.info(response.text)
+                logging.debug(f"Rate limit exceeded. Waiting for {cool_off_time} seconds.")
+                logging.debug(response.text)
                 time.sleep(cool_off_time)
+                backoff_time *= 2
             else: 
                 raise Exception(f"API request failed with status code {response.status_code}")
         except Exception as e:
-            print(f"API request failed with exception {e}")
+            logging.debug(f"API request failed with exception {e}")
             break
         call_attempts += 1
-        backoff_time *= 2 
-    logging.info(f"Max number of call attempts reached. Returning empty result")
+        logging.debug(f"Call attempts: {call_attempts}") 
+    logging.debug(f"Max number of call attempts reached. Returning empty result")
     return response
  
         
-def get_data_meteo_api(city: str, start_date: str, end_date: str, variable: str) -> pd.DataFrame():
+def get_data_meteo_api(city: str, start_date: str, end_date: str, variable: str, model:str) -> pd.DataFrame():
     """
     Fetches daily weather data for a specific city and variable from the Meteo API.
     :param city: The name of the city to fetch the data for. Must be a key in the COORDINATES dictionary.
@@ -94,7 +95,7 @@ def get_data_meteo_api(city: str, start_date: str, end_date: str, variable: str)
         "longitude": COORDINATES[city]["longitude"],
         "start_date": start_date,
         "end_date": end_date,  
-        "models":  MODELS,
+        "models":  model,
         "daily": variable
     }
     data = call_api(params)
@@ -154,8 +155,11 @@ def main():
         list_data_variables= []
         for variable in VARIABLES:
             logging.info(f"Getting data for {variable} in {city}")
-            data = get_data_meteo_api(city, "1950-01-01", "1960-12-31", variable)
-            list_data_variables.append(data)
+            for model in MODELS:
+                logging.info(f"Getting data for {model} in {city}")
+                data = get_data_meteo_api(city, "1950-01-01", "1960-12-31", variable, model)
+                logging.debug(data.head())
+                list_data_variables.append(data)
         combined_df = list_data_variables[0]
         for df in list_data_variables[1:]:
             combined_df = pd.merge(combined_df,df, on=['time', 'city'])
