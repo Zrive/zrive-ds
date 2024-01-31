@@ -4,10 +4,10 @@ import os
 
 '''DA ERROR FILE NOT FOUND'''
 
-# Bucket and file information
 bucket_name = 'zrive-ds-data'
-object_key = 'groceries/box_builder_dataset/sampled_box_builder_df.csv'
-local_file_name = 'sampled_box_builder_df.csv'
+object_key = 'groceries/box_builder_dataset/feature_frame.csv'
+local_file_name = 'feature_frame.csv' # Asume que quieres guardar el archivo con el mismo nombre en el directorio actual
+
 
 # Initialize a session using boto3
 s3 = boto3.client(
