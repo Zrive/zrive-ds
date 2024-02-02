@@ -1,3 +1,6 @@
+# Ignorar archivo específico de dataset
+src/module_2/feature_frame.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
