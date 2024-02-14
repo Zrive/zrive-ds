@@ -1,6 +1,8 @@
 import boto3
 import os
 
+##
+
 bucket_name = 'zrive-ds-data'
 object_key = 'groceries/box_builder_dataset/feature_frame.csv'
 local_file_name = 'feature_frame.csv' # Asume que quieres guardar el archivo con el mismo nombre en el directorio actual
