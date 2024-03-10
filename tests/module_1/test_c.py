@@ -1,9 +1,6 @@
 import pandas as pd
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from src.module_1.prueba_1 import (
+from src.module_1.prueba_c import (
     get_data_meteo_api,
     call_api,
     model_data,
