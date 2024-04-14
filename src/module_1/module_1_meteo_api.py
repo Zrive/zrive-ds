@@ -123,66 +123,126 @@ def get_data_meteo_api(
     return l_datos_ciudad
 
 
+def tratamiento_pd_series_a_df(serie: pd.core.series.Series, key_val: str, date_month: str) -> pd.core.frame.DataFrame:
+    ciudad = key_val.split('_')[0]
+    pdf = pd.DataFrame(serie, columns=['valores'])
+    pdf = pdf.reset_index() 
+    pdf.columns = ['modelo', 'valores']
+    pdf['ciudad'] = ciudad
+    pdf['date_month'] = date_month
+    print(date_month)
+    return pdf
+
+def concat_datos_a_tablon(diccionario_df_agg: dict, target_month: str) -> pd.core.frame.DataFrame:
+    dic_tab = dict()
+    for key in diccionario_df_agg.keys():
+        for item in diccionario_df_agg[key]:
+            dic_tab[key] = tratamiento_pd_series_a_df(serie=item
+                                                            , key_val=key
+                                                            , date_month=target_month)
+    return pd.concat([dic_tab[key] for key in dic_tab.keys()])
+
+def tratar_fechas(date_str: str) -> str:
+    from datetime import datetime, timedelta
+    date_obj = datetime.strptime(date_str, "%d-%m-%Y")
+    print(date_obj)
+    new_date_obj = date_obj - timedelta(days=1)
+    new_date_str = new_date_obj.strftime("%Y-%m-%d")
+    return new_date_str
+
 def main():
     return 0
 
 
 if __name__ == "__main__":
-    paquetes = get_data_meteo_api(
-        url=API_URL,
-        cities=COORDINATES,
-        start_date="2023-01-01",
-        end_date="2023-02-01",
-        models=MODELS,
-        data=VARIABLES,
-    )
-    agg_dic = dict()
+    
+    START_DATE = "1950-01-01"
+    END_DATE = "2050-01-01"
+    
+    lista_meses = pd.date_range(START_DATE, END_DATE, freq='MS').strftime("%m-%Y").tolist()
+    
+    lista_starts = ['01-'+ mes for mes in lista_meses]
+    
+    lista_tup_comienzo_fin = [(lista_starts[index-1], tratar_fechas(lista_starts[index])) for index in range(1, len(lista_starts))]
+    
+    l_paquetes = list()
+    
+    for fecha in lista_tup_comienzo_fin:
+        paquete_raw = get_data_meteo_api(
+            url=API_URL,
+            cities=COORDINATES,
+            start_date=fecha[0],
+            end_date=fecha[1],
+            models=MODELS,
+            data=VARIABLES,
+        )
+        l_paquetes.append(paquete_raw)
+    
+    
+    general_avg = list()
+    general_std = list()
     order_ciudades = ("madrid", "london", "rio")
-    for index, paquete in enumerate(paquetes):
-        mod_medidas = 1
-        lista_agg = list()
-        basic_df = dict()
-        lista_std = list()
-        lista_avg = list()
-        modelos_por_medida = list(paquetes[index]["daily"].keys())[1:]
-        for tipo_medida in modelos_por_medida:
-            if mod_medidas % 4 == 0:
-                df = pd.DataFrame(basic_df)
-                lista_agg.append(df)
-                lista_avg.append(df.mean())
-                lista_std.append(df.std())
-                basic_df = dict()
-            else:
+    for index_date, paquetes in enumerate(l_paquetes):
+        agg_avg_dic = dict()
+        agg_std_dic = dict()
+        for index, paquete in enumerate(paquetes):
+            mod_medidas = 1
+            lista_agg = list()
+            basic_df = dict()
+            lista_std = list()
+            lista_avg = list()
+            modelos_por_medida = list(paquetes[index]["daily"].keys())[1:]
+            for tipo_medida in modelos_por_medida:
                 basic_df[tipo_medida] = paquetes[index]["daily"][tipo_medida]
-            mod_medidas += 1
 
-            agg_dic[f"{order_ciudades[index]}_avg"] = lista_avg
-            agg_dic[f"{order_ciudades[index]}_std"] = lista_std
+                if mod_medidas % 3 == 0:
+                    df = pd.DataFrame(basic_df)
+                    lista_agg.append(df)
+                    lista_avg.append(df.mean())
+                    lista_std.append(df.std())
+                    basic_df = dict()
+                mod_medidas += 1
 
-    ### PLOTTING
+            agg_avg_dic[f"{order_ciudades[index]}_avg"] = lista_avg
+            agg_std_dic[f"{order_ciudades[index]}_std"] = lista_std
+            
+        pdf_avg_agg_mes = concat_datos_a_tablon(diccionario_df_agg=agg_avg_dic
+                                                , target_month=lista_meses[index_date])
+        pdf_std_agg_mes = concat_datos_a_tablon(diccionario_df_agg=agg_std_dic
+                                                , target_month=lista_meses[index_date])
 
-    madrid_avg = pd.DataFrame(agg_dic["madrid_avg"])
-    madrid_std = pd.DataFrame(agg_dic["madrid_std"])
+        general_avg.append(pdf_avg_agg_mes)
+        general_std.append(pdf_std_agg_mes)
+        
+    df_avg = pd.concat(general_avg)
+    df_std = pd.concat(general_std)
+    
+    df_avg.reset_index(drop=True, inplace=True)
+    df_std.reset_index(drop=True, inplace=True)
 
-    # Extract variable names for plotting. Assuming all models report the same variables.
-    variables = madrid_avg.columns
+    cities = df_avg['ciudad'].unique()    
+    for df in [df_avg, df_std]:
+        
+        for medida in VARIABLES.split(','):
+            df_temperature = df[df['modelo'].str.startswith(f"{medida}_")]
+    
+            for city in cities:
+                city_data = df_temperature[df_temperature['ciudad'] == city]
+                plt.figure(figsize=(10, 6))
+                plt.plot(city_data['date_month'], city_data['valores'], marker='o', linestyle='-')
+                plt.title(f'Temperature Time Series for {city}')
+                plt.xlabel(medida)
+                plt.ylabel('valor')
+                plt.xticks(rotation=45)
+                plt.grid(True)
+                plt.tight_layout()
+                plt.show()
 
-    # Create plots for average values
-    plt.figure(figsize=(14, 7))
-    for var in variables:
-        plt.plot(madrid_avg.index, madrid_avg[var], label=var + " Avg")
-    plt.title("Madrid Climate Variables Average")
-    plt.xlabel("Time")
-    plt.ylabel("Average Value")
-    plt.legend()
-    plt.show()
 
-    # Create plots for standard deviation values
-    plt.figure(figsize=(14, 7))
-    for var in variables:
-        plt.plot(madrid_std.index, madrid_std[var], label=var + " Std")
-    plt.title("Madrid Climate Variables Standard Deviation")
-    plt.xlabel("Time")
-    plt.ylabel("Std Value")
-    plt.legend()
-    plt.show()
+# TODO Pendiente revision nulos
+
+# TODO pendiente revision constantes
+
+# TODO crear tests
+
+# TODO meter en main las cosas y modularizar un poco el codigo
