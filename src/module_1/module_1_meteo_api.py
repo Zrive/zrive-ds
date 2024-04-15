@@ -92,8 +92,8 @@ def get_data_meteo_api(city):
     if responses:     
         daily_json = get_daily_data(responses, city)
         # Transform to dataframe
-        daily_df = pd.read_json(json.dumps(daily_json))
-        
+        daily_df = pd.DataFrame(daily_json)
+    
         # Save it in a csv only if there is not already one
         if not os.path.exists(file_path):
             daily_df.to_csv(file_path, index=False)
@@ -127,9 +127,6 @@ def get_daily_data(response, city):
         "soil_moisture_0_to_10cm_mean": daily_soil_moisture_0_to_10cm_mean
     })
 
-    # Save it in a csv
-    daily_df.to_csv(f'{city}_daily_data.csv', index=True)
-
     return daily_df
     
 
@@ -140,7 +137,7 @@ def reduce_temporal_resolution(daily_df, city):
     daily_df.set_index('date', inplace=True)  # Set 'date' as the index
 
     # Group by month and calculate the mean
-    monthly_data = daily_df.groupby(pd.Grouper(freq='M')).mean()
+    monthly_data = daily_df.groupby(pd.Grouper(freq='ME')).mean()
 
     print(monthly_data.head())
     return monthly_data
@@ -229,7 +226,6 @@ def main():
 
             print("Plotting data")
             plot_data(monthly_data, city)
-            #raise NotImplementedError
 
             print("Get statistics")
             stats = get_statistics(monthly_data, city)
