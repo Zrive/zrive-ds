@@ -290,19 +290,6 @@ sns.heatmap(corr, mask=mask, cmap=cmap, vmax=0.3, center=0, square=True, linewid
 ```
 
 
-
-
-    <Axes: >
-
-
-
-
-    
-![png](Module2_Segunda_parte_files/Module2_Segunda_parte_7_1.png)
-    
-
-
-
 ```python
 cols=3
 rows= int(np.ceil(len(numerical_cols)/cols))
@@ -318,12 +305,6 @@ ax[0].legend()
 plt.tight_layout()
 
 ```
-
-
-    
-![png](Module2_Segunda_parte_files/Module2_Segunda_parte_8_0.png)
-    
-
 
 
 ```python
