@@ -159,5 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 # Added files and directories
-.env
+/src/module2/.env
 /src/module2/orders.parquet/
