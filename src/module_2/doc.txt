@@ -1,0 +1,6 @@
+APARTADO 1
+
+1. En casi todas las regiones la media es de 2 pedidos por usuario, lo que nos podría indicar que no
+tenemos muchos clientes habituales.
+2. Hay regiones predominantes en cuanto a numero de pedidos, pero no podemos sacar informacion precisa
+sin antes investigar cómo de grandes son esas regiones.
