@@ -161,3 +161,4 @@ cython_debug/
 # Added files and directories
 /src/module2/.env
 /src/module2/orders.parquet/
+/src/module_3/feature_frame.csv
