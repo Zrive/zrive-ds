@@ -1,4 +1,14 @@
-""" This is a dummy example """
+
+
+API_URL = "<https://archive-api.open-meteo.com/v1/archive?"
+
+COORDINATES = {
+    "Madrid": {"latitude": 40.416775, "longitude": -3.703790},
+    "London": {"latitude": 51.507351, "longitude": -0.127758},
+    "Rio": {"latitude": -22.906847, "longitude": -43.172896},
+}
+
+VARIABLES = ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max"]
 
 def main():
     raise NotImplementedError
@@ -7,40 +17,34 @@ if __name__ == "__main__":
     main()
 
 
-# Funcion para gestionar APIs
-
-
-# Madrid
-latitude=40.4165
-longitude=-3.7026
-
-# Londres
-latitude=51.507351
-longitude=-0.127758
-
-# Rio de Janeiro
-latitude=-22.906847
-longitude=-43.172896
-
-
 start_date = '2010-01-01'
 end_date   = '2020-12-31'
-lista_variables = ['temperature_2m_mean', 'precipitation_sum', 'wind_speed_10m_max']
-resolution ='daily'
 
-def get_data_meteo_api(latitude, longitude, start_date, end_date, lista_variables, resolution):
+RESOLUTION ='daily' # L
+
+# Función que crea la URL de la API
+
+# Por cada ciudad se hace una llamada
+# Para recolectar datos de varias ciudades se hacen varias llamadas
+# Como la entrada es el nombre de la ciudad, puedo recorrer en un bucle el diccionario de coordenadas
+# que se quieren conocer.
+
+def get_data_meteo_api(nombre_ciudad, start_date, end_date, lista_variables, resolution):
     '''
     resolution: posibles valores 'daily' o 'hourly'.
     '''
     import requests
     import json
 
+    nombre_ciudad = nombre_ciudad.capitalize()
+    
     # Tomar variables y pasarlas a "formato url"
-    latitude_url   = 'latitude=' + str(latitude)
-    longitude_url  = 'longitude='+ str(longitude)
+    latitude_url   = 'latitude=' + str(COORDINATES[nombre_ciudad]["latitude"])
+    longitude_url  = 'longitude='+ str(COORDINATES[nombre_ciudad]["longitude"])
     start_date_url = 'start_date=' + start_date
     end_date_url   = 'end_date=' + end_date
     resolution_url = resolution
+    
     # variables_url
     variables_url = ''
     for variable in lista_variables:
@@ -54,13 +58,8 @@ def get_data_meteo_api(latitude, longitude, start_date, end_date, lista_variable
     # Llamada a la API (construir función)
     res = requests.get(API_url)
 
-    
     return res.json()
 
-meteo_Madrid = get_data_meteo_api(latitude, longitude, start_date, end_date, lista_variables, resolution) # Diccionario de python
-
-
-# Extraer datos del JSON
 
 def print_dict_schema(data, indent=0):
     """
@@ -85,20 +84,55 @@ def print_dict_schema(data, indent=0):
     else:
         print(' ' * indent + f"Valor: {data} | Tipo: {type(data).__name__}")
 
-# Imprimir la estructura del diccionario
-print_dict_schema(meteo_Madrid)
 
-dict_madrid = meteo_Madrid['daily']
+
+
+
+# 1 - Llamada a la API
+# 2 - Pongo los datos que me interesan en un dataframe de Pandas
+# 3 - Agrupo los datos en un dataframe de pandas
 
 import pandas as pd
-pd_data = pd.DataFrame(dict_madrid, index=dict_madrid['time'])
-pd_data.index = pd.to_datetime(pd_data.index)
-pd_data.drop('time', axis=1, inplace=True)
 
-pd_data.info()
-pd_data.describe()
-pd_data.dtypes
+# Bulce para hacer las llamadas a la API
 
+data_list = []
+
+for ciudad, coordenadas in COORDINATES.items():
+
+    API_data = get_data_meteo_api(ciudad, start_date, end_date, lista_variables, RESOLUTION)['daily']
+    pd_data = pd.DataFrame(dict_madrid, index=dict_madrid['time'])
+    pd_data.index = pd.to_datetime(pd_data.index)
+    pd_data.drop('time', axis=1, inplace=True)
+    pd_data['city'] = ciudad
+
+    data_list.append(pd_data)
+
+
+
+# Bucle para hacer la transformación de los datos
+
+for data_ciudad in data_list:
+    for variable in VARIABLES:
+        nombre_ciudad = data_ciudad['city'].iloc[0]
+        data_ciudad_variable =data_ciudad[variable].resample('MS').agg(['max', 'mean', 'min'])
+
+        plt.figure()
+        plt.plot(data_ciudad_variable.index, data_ciudad_variable['mean'])
+        plt.fill_between(data_ciudad_variable.index, data_ciudad_variable['min'], data_ciudad_variable['max'], alpha=0.2 )
+        plt.grid()
+        plt.xlabel('Fecha (mes)')
+        plt.ylabel(variable)
+        plt.title(nombre_ciudad)
+        
+        plt.savefig(f"graficas/{nombre_ciudad}" + "_" + str(variable))
+
+
+
+# Quiero sacar un único gráfico por ciudad y variable con datos máximos y mínimos
+
+
+    
 
 
 # Representacion de las variables
@@ -107,7 +141,7 @@ pd_data.dtypes
 
 import matplotlib.pyplot as plt
 
-pd_data_graph = pd_data.resample('MS').mean() # poner 'M' si se prefiere que índice sea el último día del mes
+pd_data_graph = pd_data[VARIABLES].resample('MS').mean() # poner 'M' si se prefiere que índice sea el último día del mes
 
 plt.figure(figsize=(9, 3))
 
