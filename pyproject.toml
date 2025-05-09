@@ -16,8 +16,22 @@ flake8 = "^6.1.0"
 mypy = "^1.5.1"
 pytest = "^7.4.0"
 scikit-learn = "^1.4.1.post1"
+openmeteo-requests = "^1.4.0"
+requests-cache = "^1.2.1"
+retry-requests = "^2.0.0"
+pyarrow = "^20.0.0"
+fastparquet = "^2024.11.0"
+matplotlib-venn = "^1.1.2"
+seaborn = "^0.13.2"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+awscli = "^1.40.6"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+
