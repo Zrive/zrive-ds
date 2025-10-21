@@ -1,0 +1,47 @@
+De cara a intentar aumentar las ventas mensuales un 2% así como la de productos específicos un 25%, realizamos un modelo
+lineal dónde lo que hacemos es obtener el valor de cada cesta para cada uno de los orders que tenemos como label, de cara
+a ver cuáles pueden ser las variables que más influyen. Para ello, al estar "achicando" el dataset, ya que estamos agru-
+pando por order_id, lo que hacemos es agrupar el resto de las variables según su suma por order_id, o su media en la mayoría
+de las variables que tenemos.
+
+Primero realizamos un modelo lineal sin ningún tipo de restricción dónde dividimos el dataset temporalmente y hacemos un 
+check sobre un posible solapamiento de users. Entrenamos el modelo con el 70% de los datos que tenemos, validamos con un 
+20% y testeamos con el resto. Usamos RMSE y R^2 como medidores del accuracy de nuestro modelo. Tras esto, intentamos ser 
+más específicos en los resultados que obtenmos y aplicamos restricciones Ridge y Lasso de cara a las posibles penalizacio-
+nes que podría tener nuestro modelo. Vemos como Lasso nos elimina el poder predictivo de dos variables y Ridge "aplana" el 
+valor de nuestros coeficientes.
+
+Finalmente escogemos el modelo con mejor RMSE en ambos casos, de cara a poder evaluar cuáles son las variables que más
+poder predictivo tienen sobre mi label, y por lo tanto poder trabajar sobre ellas de cara aumentar las ventas del super-
+mecado.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
+
+
+
+
+.
