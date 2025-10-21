@@ -14,3 +14,34 @@ valor de nuestros coeficientes.
 Finalmente escogemos el modelo con mejor RMSE en ambos casos, de cara a poder evaluar cuáles son las variables que más
 poder predictivo tienen sobre mi label, y por lo tanto poder trabajar sobre ellas de cara aumentar las ventas del super-
 mecado.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
