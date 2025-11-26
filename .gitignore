@@ -152,6 +152,26 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+#Datos y Credenciales
+Credenciales.txt
+data/
+
+# Modelos locales
+bin/
+*.joblib
+*.pkl
+
+# Logs
+*.log
+*.txt
+
+# Carpetas temporales
+tmp/
+temp/
+
+# Archivos de parquets descargados
+*.parquet
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
