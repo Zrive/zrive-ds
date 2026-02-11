@@ -1,0 +1,29 @@
+import boto3
+import os
+
+##
+
+bucket_name = 'zrive-ds-data'
+object_key = 'groceries/box_builder_dataset/feature_frame.csv'
+local_file_name = 'feature_frame.csv' # Asume que quieres guardar el archivo con el mismo nombre en el directorio actual
+
+
+# Initialize a session using boto3
+s3 = boto3.client(
+    's3',
+    aws_access_key_id='',
+    aws_secret_access_key=''
+)
+
+# Create an S3 client
+
+
+# Attempt to download the file
+try:
+    s3.download_file(bucket_name, object_key, local_file_name)
+    print(f"File downloaded successfully: {local_file_name}")
+except s3.exceptions.NoSuchKey:
+    print("The object does not exist at the specified key.")
+except Exception as e:
+    print("An error occurred:", e)
+
